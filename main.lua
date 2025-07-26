@@ -13,7 +13,7 @@ local song
 local pointEatenSound
 local death
 local packman_image, point_image, wall_image, cherry_image, 
-    bigPoint_image, blinky, inky, pinky, clyde --variables for images
+    bigPoint_image, blinky_image, inky_image, pinky_image, clyde_image --variables for images
 
 
 function love.load()
