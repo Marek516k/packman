@@ -7,7 +7,7 @@ local Packman = {
     {x = 12, y = 9} -- Initial position of Packman
     }
 local cherryspwn_delay = 0
-local cherry = nil -- Variable to hold the cherry position
+cherry = nil -- Variable to hold the cherry position
 local gameover = false
 local font_size
 local song
@@ -48,15 +48,12 @@ function love.update(dt)
             timer = 0
             local player = Packman[1]
             local newX, newY = player.x, player.y
-            if dir == "right" then newX = newX + 1 end
-            if dir == "left" then newX = newX - 1 end
-            if dir == "up" then newY = newY - 1 end
-            if dir == "down" then newY = newY + 1 end
-        if cherryspwn_delay >= 5 then -- spawn a cherry every 5 seconds
-            cherryspwn_delay = 0
-            cherry = {x = math.random(0, 24), y = math.random(0, 18)} -- random position for the cherry
-            --cherrySound:play() -- play sound when cherry spawns
-        end
+            if dir == "right" then newX = newX + 0.5 end
+            if dir == "left" then newX = newX - 0.5 end
+            if dir == "up" then newY = newY - 0.5 end
+            if dir == "down" then newY = newY + 0.5 end
+            player.x = newX
+            player.y = newY
         end
     end
 end

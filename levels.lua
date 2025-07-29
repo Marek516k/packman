@@ -1,1 +1,2 @@
 --this file is gonna contain the game levels
+--cherry spawns at set positions same with the walls and bigpoints
