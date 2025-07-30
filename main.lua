@@ -21,9 +21,15 @@ local invicibility = false
 local points = 0
 local cherryspwn_delay = 0
 local nextDir = "right"
+ghosts = {
+    {x = 0, y = 0},
+    {x = 0, y = 0},
+    {x = 0, y = 0},
+    {x = 0, y = 0}
+}
 
 function canMove(newX, newY)
-    --actual wall logit and stuff soon
+    --actual wall logit and stuff soon since i need to make levels first anyways
     return true
 end
 
@@ -99,5 +105,20 @@ function love.keypressed(key)
     if key == "r" and gameover then
         love.event.quit("restart")
         gameover = false
+    end
+end
+
+function love.checkColl(ghosts, points, cherries, bigPoint)
+    --game collisions for ghosts,points and cherries
+    for i = 1, #ghosts do
+        local ghost = ghosts[i]
+        if ghost.x == Packman[1].x and ghost.y == Packman[1].y then   
+            if not invicibility then
+                gameover = true
+                love.audio.play(death)
+            else
+                points = points + 200 -- bonus for eating a ghost
+            end
+        end
     end
 end

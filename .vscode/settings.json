@@ -3,6 +3,7 @@
         "getDirectionOffset",
         "isWalkable",
         "cherry",
-        "canMove"
+        "canMove",
+        "ghosts"
     ]
 }
