@@ -20,6 +20,12 @@ local points = 0
 local invicibility = false
 local points = 0
 local cherryspwn_delay = 0
+local nextDir = "right"
+
+function canMove(newX, newY)
+    --actual wall logit and stuff soon
+    return true
+end
 
 function love.load()
     love.window.setTitle("Packman - temu edition")
@@ -48,6 +54,14 @@ function love.update(dt)
             timer = 0
             local player = Packman[1]
             local newX, newY = player.x, player.y
+            local tempX, tempY = newX, newY
+            if nextDir == "right" then tempX = tempX + 0.5 end
+            if nextDir == "left" then tempX = tempX - 0.5 end
+            if nextDir == "up" then tempY = tempY - 0.5 end
+            if nextDir == "down" then tempY = tempY + 0.5 end
+            if canMove(tempX, tempY) then
+                dir = nextDir
+            end
             if dir == "right" then newX = newX + 0.5 end
             if dir == "left" then newX = newX - 0.5 end
             if dir == "up" then newY = newY - 0.5 end
@@ -77,14 +91,13 @@ function love.draw()
     end
 end
 
---simple key controls
 function love.keypressed(key)
-    if key == "d" and dir ~= "left" then dir = "right" end
-    if key == "a" and dir ~= "right" then dir = "left" end
-    if key == "w" and dir ~= "down" then dir = "up" end
-    if key == "s" and dir ~= "up" then dir = "down" end
+    if key == "d" then nextDir = "right" end
+    if key == "a" then nextDir = "left" end
+    if key == "w" then nextDir = "up" end
+    if key == "s" then nextDir = "down" end
     if key == "r" and gameover then
-        love.event.quit("restart") -- Restart the game
+        love.event.quit("restart")
         gameover = false
     end
 end
