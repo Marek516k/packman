@@ -4,6 +4,8 @@
         "isWalkable",
         "cherry",
         "canMove",
-        "ghosts"
+        "ghosts",
+        "pointPosition",
+        "level1"
     ]
 }

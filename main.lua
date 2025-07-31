@@ -27,6 +27,8 @@ ghosts = {
     {x = 0, y = 0},
     {x = 0, y = 0}
 }
+local bigPoint = nil
+local pointPosition = nil -- Variable to hold the position of the points
 
 function canMove(newX, newY)
     --actual wall logit and stuff soon since i need to make levels first anyways
@@ -86,10 +88,16 @@ function love.draw()
     love.graphics.print(pointsText, love.graphics.getWidth() - textWidth - 10, 10)
     local player = Packman[1]
     love.graphics.draw(packman_image, player.x * gridSize, player.y * gridSize)
-    if cherry then
+    --[[if cherry then
         love.graphics.draw(cherry_image, cherry.x * gridSize, cherry.y * gridSize)
     end
-
+    if pointPosition then
+        love.graphics.draw(point_image, pointPosition.pointx * gridSize, pointPosition.pointy * gridSize)
+    end
+    if bigPoint then
+        love.graphics.draw(bigPoint_image, bigPoint.x * gridSize, bigPoint.y * gridSize)
+    end
+    ]]
     if gameover then -- if the game is over it draws the game over screen
         love.graphics.setFont(font_size)
         love.graphics.setColor(1, 0, 0, 1) --red
@@ -108,7 +116,7 @@ function love.keypressed(key)
     end
 end
 
-function love.checkColl(ghosts, points, cherries, bigPoint)
+function love.checkColl(ghosts, points, cherries, bigPoint,point)
     --game collisions for ghosts,points and cherries
     for i = 1, #ghosts do
         local ghost = ghosts[i]
@@ -122,3 +130,15 @@ function love.checkColl(ghosts, points, cherries, bigPoint)
         end
     end
 end
+--[[to be implemented if i dont find a better way to do this
+function pointPosition(pointx,pointy)
+    -- Function to set the position of the points
+    pointPosition = {pointx = nil, pointy = nil}
+end
+
+function bigPoint()
+    -- Function to set the position of the big point
+    bigPoint = {x = nil, y = nil}
+    
+end
+]]
