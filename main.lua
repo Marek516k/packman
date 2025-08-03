@@ -1,5 +1,6 @@
 local love = require("love")
-local level1 = require("levels")
+local level = require("levels")
+local currentLevel = level[1]
 local gridSize = 32
 local timer = 0
 local interval = 0.3
@@ -10,7 +11,7 @@ local Packman = {
 local cherryspwn_delay = 0
 cherry = nil -- Variable to hold the cherry position
 local gameover = false
-local font_size
+local font_size = love.graphics.newFont(25)
 local song
 local cherrySound
 local death
@@ -82,7 +83,7 @@ function love.update(dt)
 end
 
 function love.draw()
-for y, row in ipairs(level1.map) do
+for y, row in ipairs(currentLevel.map) do
     for x = 1, #row do
         local tile = row:sub(x, x)
         local drawX, drawY = (x - 1) * gridSize, (y - 1) * gridSize
@@ -93,28 +94,31 @@ for y, row in ipairs(level1.map) do
             love.graphics.draw(point_image, drawX, drawY)
         elseif tile == "C" then
             love.graphics.draw(cherry_image, drawX, drawY)
-        elseif tile == "O" then
+        elseif tile == "o" then
             love.graphics.draw(bigPoint_image, drawX, drawY)
+        elseif tile == "b" then 
+            love.graphics.draw(blinky_image, drawX, drawY)
+        elseif tile == "i" then
+            love.graphics.draw(inky_image, drawX, drawY)
+        elseif tile == "p" then
+            love.graphics.draw(pinky_image, drawX, drawY)
+        elseif tile == "c" then
+            love.graphics.draw(clyde_image, drawX, drawY)
+        elseif tile == "P" then
+            love.graphics.draw(packman_image, drawX, drawY)
         end
     end
 end
+    do
     love.graphics.setFont(font_size)
-    love.graphics.setColor(1, 1, 1, 1) -- white
+    love.graphics.setColor(1, 0, 0, 1)
     local pointsText = "Points: " .. tostring(points)
     local textWidth = font_size:getWidth(pointsText)
     love.graphics.print(pointsText, love.graphics.getWidth() - textWidth - 10, 10)
+    love.graphics.setColor(1, 1, 1, 1) -- reset color to white
+    end
     local player = Packman[1]
     love.graphics.draw(packman_image, player.x * gridSize, player.y * gridSize)
-    --[[if cherry then
-        love.graphics.draw(cherry_image, cherry.x * gridSize, cherry.y * gridSize)
-    end
-    if pointPosition then
-        love.graphics.draw(point_image, pointPosition.pointx * gridSize, pointPosition.pointy * gridSize)
-    end
-    if bigPoint then
-        love.graphics.draw(bigPoint_image, bigPoint.x * gridSize, bigPoint.y * gridSize)
-    end
-    ]]
     if gameover then -- if the game is over it draws the game over screen
         love.graphics.setFont(font_size)
         love.graphics.setColor(1, 0, 0, 1) --red
