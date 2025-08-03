@@ -1,13 +1,13 @@
 local love = require("love")
 local level = require("levels")
 local currentLevel = level[1]
+local Packman = {
+    { x = 8, y = 10 } -- Initial position of Packman
+}
 local gridSize = 32
 local timer = 0
-local interval = 0.3
+local interval = 0.5
 local dir = "right" -- Initial direction
-local Packman = {
-    {x = 12, y = 9} -- Initial position of Packman
-    }
 local cherryspwn_delay = 0
 cherry = nil -- Variable to hold the cherry position
 local gameover = false
@@ -22,13 +22,7 @@ local points = 0
 local invicibility = false
 local points = 0
 local cherryspwn_delay = 0
-local nextDir = "right"
-ghosts = {
-    {x = 0, y = 0},
-    {x = 0, y = 0},
-    {x = 0, y = 0},
-    {x = 0, y = 0}
-}
+local nextDir = "up"
 local bigPoint = nil
 local pointPosition = nil -- Variable to hold the position of the points
 
@@ -38,7 +32,7 @@ function canMove(newX, newY)
 end
 
 function love.load()
-    love.window.setTitle("Packman - temu edition")
+    love.window.setTitle("Packman - but worse edition")
     love.window.setMode(800, 600, { resizable = false, vsync = true })
     font_size = love.graphics.newFont(20)
     packman_image = love.graphics.newImage("packman.png")
@@ -87,7 +81,6 @@ for y, row in ipairs(currentLevel.map) do
     for x = 1, #row do
         local tile = row:sub(x, x)
         local drawX, drawY = (x - 1) * gridSize, (y - 1) * gridSize
-
         if tile == "#" then
             love.graphics.draw(wall_image, drawX, drawY)
         elseif tile == "." then
@@ -105,20 +98,18 @@ for y, row in ipairs(currentLevel.map) do
         elseif tile == "c" then
             love.graphics.draw(clyde_image, drawX, drawY)
         elseif tile == "P" then
-            love.graphics.draw(packman_image, drawX, drawY)
+            local player = Packman[1]
+            love.graphics.draw(packman_image, player.x * gridSize, player.y * gridSize)
+            
         end
     end
 end
-    do
     love.graphics.setFont(font_size)
     love.graphics.setColor(1, 0, 0, 1)
     local pointsText = "Points: " .. tostring(points)
     local textWidth = font_size:getWidth(pointsText)
     love.graphics.print(pointsText, love.graphics.getWidth() - textWidth - 10, 10)
-    love.graphics.setColor(1, 1, 1, 1) -- reset color to white
-    end
-    local player = Packman[1]
-    love.graphics.draw(packman_image, player.x * gridSize, player.y * gridSize)
+    love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
     if gameover then -- if the game is over it draws the game over screen
         love.graphics.setFont(font_size)
         love.graphics.setColor(1, 0, 0, 1) --red
