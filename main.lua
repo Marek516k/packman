@@ -1,4 +1,5 @@
 local love = require("love")
+local level1 = require("levels")
 local gridSize = 32
 local timer = 0
 local interval = 0.3
@@ -63,17 +64,17 @@ function love.update(dt)
             local player = Packman[1]
             local newX, newY = player.x, player.y
             local tempX, tempY = newX, newY
-            if nextDir == "right" then tempX = tempX + 0.5 end
-            if nextDir == "left" then tempX = tempX - 0.5 end
-            if nextDir == "up" then tempY = tempY - 0.5 end
-            if nextDir == "down" then tempY = tempY + 0.5 end
+            if nextDir == "right" then tempX = tempX + 1 end
+            if nextDir == "left" then tempX = tempX - 1 end
+            if nextDir == "up" then tempY = tempY - 1 end
+            if nextDir == "down" then tempY = tempY + 1 end
             if canMove(tempX, tempY) then
                 dir = nextDir
             end
-            if dir == "right" then newX = newX + 0.5 end
-            if dir == "left" then newX = newX - 0.5 end
-            if dir == "up" then newY = newY - 0.5 end
-            if dir == "down" then newY = newY + 0.5 end
+            if dir == "right" then newX = newX + 1 end
+            if dir == "left" then newX = newX - 1 end
+            if dir == "up" then newY = newY - 1 end
+            if dir == "down" then newY = newY + 1 end
             player.x = newX
             player.y = newY
         end
@@ -81,6 +82,22 @@ function love.update(dt)
 end
 
 function love.draw()
+for y, row in ipairs(level1.map) do
+    for x = 1, #row do
+        local tile = row:sub(x, x)
+        local drawX, drawY = (x - 1) * gridSize, (y - 1) * gridSize
+
+        if tile == "#" then
+            love.graphics.draw(wall_image, drawX, drawY)
+        elseif tile == "." then
+            love.graphics.draw(point_image, drawX, drawY)
+        elseif tile == "C" then
+            love.graphics.draw(cherry_image, drawX, drawY)
+        elseif tile == "O" then
+            love.graphics.draw(bigPoint_image, drawX, drawY)
+        end
+    end
+end
     love.graphics.setFont(font_size)
     love.graphics.setColor(1, 1, 1, 1) -- white
     local pointsText = "Points: " .. tostring(points)
