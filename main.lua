@@ -4,6 +4,12 @@ local currentLevel = level[1]
 local Packman = {
     { x = 8, y = 10 } -- Initial position of Packman
 }
+local ghosts = {
+    { x = 11, y = 10, type = "blinky" },
+    { x = 11, y = 9, type = "inky" },
+    { x = 10, y = 9, type = "pinky" },
+    { x = 10, y = 10, type = "clyde" }
+}
 local gridSize = 32
 local timer = 0
 local interval = 0.5
@@ -17,7 +23,7 @@ local cherrySound
 local death
 local packman_image, point_image, wall_image, cherry_image, 
     bigPoint_image, blinky_image, inky_image, pinky_image, clyde_image --variables for images
-local lives = 3
+local lives = 2
 local points = 0
 local invicibility = false
 local points = 0
@@ -26,8 +32,13 @@ local nextDir = "up"
 local bigPoint = nil
 local pointPosition = nil -- Variable to hold the position of the points
 
-function canMove(newX, newY)
-    --actual wall logit and stuff soon since i need to make levels first anyways
+function canMove(tempX, tempY)
+--prechecking if the player can move
+--[[
+        return false -- unable to move that way
+    else
+        return true
+    end ]]
     return true
 end
 
@@ -72,6 +83,7 @@ function love.update(dt)
             if dir == "down" then newY = newY + 1 end
             player.x = newX
             player.y = newY
+            --love.checkColl(ghosts)
         end
     end
 end
@@ -128,29 +140,18 @@ function love.keypressed(key)
     end
 end
 
-function love.checkColl(ghosts, points, cherries, bigPoint,point)
-    --game collisions for ghosts,points and cherries
+function love.checkColl()
+    --needs to be fixed cuz ts is bad
     for i = 1, #ghosts do
         local ghost = ghosts[i]
-        if ghost.x == Packman[1].x and ghost.y == Packman[1].y then   
+        if ghost.x == Packman[1].x and ghost.y == Packman[1].y then
             if not invicibility then
                 gameover = true
                 love.audio.play(death)
             else
                 points = points + 200 -- bonus for eating a ghost
+                return points
             end
         end
     end
 end
---[[to be implemented if i dont find a better way to do this
-function pointPosition(pointx,pointy)
-    -- Function to set the position of the points
-    pointPosition = {pointx = nil, pointy = nil}
-end
-
-function bigPoint()
-    -- Function to set the position of the big point
-    bigPoint = {x = nil, y = nil}
-    
-end
-]]
