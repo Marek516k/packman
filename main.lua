@@ -1,6 +1,6 @@
 local love = require("love")
 local level = require("levels")
-local currentLevel = level[2]
+local currentLevel = level[3]
 local Packman = {
     { x = 8, y = 10 } -- Initial position of Packman
 }
