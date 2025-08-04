@@ -1,6 +1,6 @@
 local love = require("love")
 local level = require("levels")
-local currentLevel = level[4]
+local currentLevel = level[5]
 local Packman = {
     { x = 8, y = 10 } -- Initial position of Packman
 }
@@ -35,7 +35,7 @@ local pointPosition = nil -- Variable to hold the position of the points
 function canMove(tempX, tempY)
 --prechecking if the player can move
 --[[
-        return false -- unable to move that way
+        return false
     else
         return true
     end ]]
@@ -62,7 +62,7 @@ function love.load()
 end
 
 function love.update(dt)
-    if not gameover then --checks if the game is over
+    if not gameover then
         timer = timer + dt
         cherryspwn_delay = cherryspwn_delay + dt -- timer for spawning cherries
         if timer >= interval then
@@ -122,7 +122,7 @@ end
     local textWidth = font_size:getWidth(pointsText)
     love.graphics.print(pointsText, love.graphics.getWidth() - textWidth - 10, 10)
     love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
-    if gameover then -- if the game is over it draws the game over screen
+    if gameover then
         love.graphics.setFont(font_size)
         love.graphics.setColor(1, 0, 0, 1) --red
         love.graphics.printf("YOU LOST, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
@@ -155,3 +155,4 @@ function love.checkColl()
         end
     end
 end
+-- need to add teleportation man :(, AI is gonna kill me
