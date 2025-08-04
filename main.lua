@@ -1,38 +1,7 @@
 local love = require("love")
 local level = require("levels")
-local currentLevel = level[5]
-local Packman = {
-    { x = 8, y = 10 } -- Initial position of Packman
-}
-local ghosts = {
-    { x = 11, y = 10, type = "blinky" },
-    { x = 11, y = 9, type = "inky" },
-    { x = 10, y = 9, type = "pinky" },
-    { x = 10, y = 10, type = "clyde" }
-}
-local gridSize = 32
-local timer = 0
-local interval = 0.5
-local dir = "right" -- Initial direction
-local cherryspwn_delay = 0
-cherry = nil -- Variable to hold the cherry position
-local gameover = false
-local font_size = love.graphics.newFont(25)
-local song
-local cherrySound
-local death
-local packman_image, point_image, wall_image, cherry_image, 
-    bigPoint_image, blinky_image, inky_image, pinky_image, clyde_image --variables for images
-local lives = 2
-local points = 0
-local invicibility = false
-local points = 0
-local cherryspwn_delay = 0
-local nextDir = "up"
-local bigPoint = nil
-local pointPosition = nil -- Variable to hold the position of the points
 
-function canMove(tempX, tempY)
+function CanMove(tempX, tempY)
 --prechecking if the player can move
 --[[
         return false
@@ -43,116 +12,138 @@ function canMove(tempX, tempY)
 end
 
 function love.load()
+    Packman = {
+    { x = 8, y = 10 }
+}
+    Ghosts = {
+    { x = 11, y = 10, type = "blinky" },
+    { x = 11, y = 9, type = "inky" },
+    { x = 10, y = 9, type = "pinky" },
+    { x = 10, y = 10, type = "clyde" }
+}
+    Font_size = love.graphics.newFont(25)
+    Death = love.audio.newSource("Death.wav", "static")
+    CherryAlert = love.audio.newSource("cherry.wav", "static")
+    Song = love.audio.newSource("Song.mp3", "stream")
+    GridSize = 32
+    Lives = 2
+    Points = 0
+    Cherry_delay = 0
+    Timer = 0
+    Interval = 0.4
+    Gameover = false
+    Invincibility = false
     love.window.setTitle("Packman - but worse edition")
     love.window.setMode(800, 600, { resizable = false, vsync = true })
-    font_size = love.graphics.newFont(20)
-    packman_image = love.graphics.newImage("packman.png")
-    point_image = love.graphics.newImage("point.png")
-    wall_image = love.graphics.newImage("wall.png")
-    cherry_image = love.graphics.newImage("cherry.png")
-    bigPoint_image = love.graphics.newImage("bigPoint.png")
-    blinky_image = love.graphics.newImage("blinky.png")
-    inky_image = love.graphics.newImage("inky.png")
-    pinky_image = love.graphics.newImage("pinky.png")
-    clyde_image = love.graphics.newImage("clyde.png")
-    --[[cherrySound = love.audio.newSource("", "static")
-    song = love.audio.newSource("", "stream")
-    death = love.audio.newSource("", "stream")
-    ]]
+    Font_size = love.graphics.newFont(20)
+    Packman_image = love.graphics.newImage("packman.png")
+    Point_image = love.graphics.newImage("point.png")
+    Wall_image = love.graphics.newImage("wall.png")
+    Cherry_image = love.graphics.newImage("cherry.png")
+    BigPoint_image = love.graphics.newImage("bigPoint.png")
+    Blinky_image = love.graphics.newImage("blinky.png")
+    Inky_image = love.graphics.newImage("inky.png")
+    Pinky_image = love.graphics.newImage("pinky.png")
+    Clyde_image = love.graphics.newImage("clyde.png")
 end
 
 function love.update(dt)
-    if not gameover then
-        timer = timer + dt
-        cherryspwn_delay = cherryspwn_delay + dt -- timer for spawning cherries
-        if timer >= interval then
-            timer = 0
+    if not Gameover then
+        Timer = Timer + dt
+        Cherry_delay = Cherry_delay + dt -- Timer for spawning cherries
+        if Timer >= Interval then
+            Timer = 0
             local player = Packman[1]
             local newX, newY = player.x, player.y
             local tempX, tempY = newX, newY
-            if nextDir == "right" then tempX = tempX + 1 end
-            if nextDir == "left" then tempX = tempX - 1 end
-            if nextDir == "up" then tempY = tempY - 1 end
-            if nextDir == "down" then tempY = tempY + 1 end
-            if canMove(tempX, tempY) then
-                dir = nextDir
+            if NextDir == "right" then tempX = tempX + 1 end
+            if NextDir == "left" then tempX = tempX - 1 end
+            if NextDir == "up" then tempY = tempY - 1 end
+            if NextDir == "down" then tempY = tempY + 1 end
+            if CanMove(tempX, tempY) then
+                Dir = NextDir
             end
-            if dir == "right" then newX = newX + 1 end
-            if dir == "left" then newX = newX - 1 end
-            if dir == "up" then newY = newY - 1 end
-            if dir == "down" then newY = newY + 1 end
+            if Dir == "right" then newX = newX + 1 end
+            if Dir == "left" then newX = newX - 1 end
+            if Dir == "up" then newY = newY - 1 end
+            if Dir == "down" then newY = newY + 1 end
             player.x = newX
             player.y = newY
-            --love.checkColl(ghosts)
+            --love.checkColl(Ghosts)
         end
     end
 end
 
 function love.draw()
-for y, row in ipairs(currentLevel.map) do
-    for x = 1, #row do
-        local tile = row:sub(x, x)
-        local drawX, drawY = (x - 1) * gridSize, (y - 1) * gridSize
-        if tile == "#" then
-            love.graphics.draw(wall_image, drawX, drawY)
-        elseif tile == "." then
-            love.graphics.draw(point_image, drawX, drawY)
-        elseif tile == "C" then
-            love.graphics.draw(cherry_image, drawX, drawY)
-        elseif tile == "o" then
-            love.graphics.draw(bigPoint_image, drawX, drawY)
-        elseif tile == "b" then 
-            love.graphics.draw(blinky_image, drawX, drawY)
-        elseif tile == "i" then
-            love.graphics.draw(inky_image, drawX, drawY)
-        elseif tile == "p" then
-            love.graphics.draw(pinky_image, drawX, drawY)
-        elseif tile == "c" then
-            love.graphics.draw(clyde_image, drawX, drawY)
-        elseif tile == "P" then
-            local player = Packman[1]
-            love.graphics.draw(packman_image, player.x * gridSize, player.y * gridSize)
-            
+    local currentLevel = level[1]
+    for y, row in ipairs(currentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize
+            if tile == "#" then
+                love.graphics.draw(Wall_image, drawX, drawY)
+            elseif tile == "." then
+                love.graphics.draw(Point_image, drawX, drawY)
+            elseif tile == "C" then
+                love.graphics.draw(Cherry_image, drawX, drawY)
+            elseif tile == "o" then
+                love.graphics.draw(BigPoint_image, drawX, drawY)
+            elseif tile == "b" then 
+                love.graphics.draw(Blinky_image, drawX, drawY)
+            elseif tile == "i" then
+                love.graphics.draw(Inky_image, drawX, drawY)
+            elseif tile == "p" then
+                love.graphics.draw(Pinky_image, drawX, drawY)
+            elseif tile == "c" then
+                love.graphics.draw(Clyde_image, drawX, drawY)
+            elseif tile == "P" then
+                local player = Packman[1]
+                love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
+                
+            end
         end
     end
-end
-    love.graphics.setFont(font_size)
-    love.graphics.setColor(1, 0, 0, 1)
-    local pointsText = "Points: " .. tostring(points)
-    local textWidth = font_size:getWidth(pointsText)
-    love.graphics.print(pointsText, love.graphics.getWidth() - textWidth - 10, 10)
-    love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
-    if gameover then
-        love.graphics.setFont(font_size)
-        love.graphics.setColor(1, 0, 0, 1) --red
-        love.graphics.printf("YOU LOST, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+        love.graphics.setFont(Font_size)
+        love.graphics.setColor(1, 0, 0, 1)
+        local PointsText = "Points: " .. tostring(Points)
+        local textWidth = Font_size:getWidth(PointsText)
+        love.graphics.print(PointsText, love.graphics.getWidth() - textWidth - 10, 10)
+        love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
+        if Gameover then
+            love.graphics.setFont(Font_size)
+            love.graphics.setColor(1, 0, 0, 1) --red
+            love.graphics.printf("YOU LOST, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+        end
     end
-end
 
 function love.keypressed(key)
-    if key == "d" then nextDir = "right" end
-    if key == "a" then nextDir = "left" end
-    if key == "w" then nextDir = "up" end
-    if key == "s" then nextDir = "down" end
-    if key == "r" and gameover then
+    if key == "d" then NextDir = "right" end
+    if key == "a" then NextDir = "left" end
+    if key == "w" then NextDir = "up" end
+    if key == "s" then NextDir = "down" end
+    if key == "r" and Gameover then
         love.event.quit("restart")
-        gameover = false
+        Gameover = false
     end
 end
 
 function love.checkColl()
     --needs to be fixed cuz ts is bad
-    for i = 1, #ghosts do
-        local ghost = ghosts[i]
+    for i = 1, #Ghosts do
+        local ghost = Ghosts[i]
         if ghost.x == Packman[1].x and ghost.y == Packman[1].y then
-            if not invicibility then
-                gameover = true
-                love.audio.play(death)
-            else
-                points = points + 200 -- bonus for eating a ghost
-                return points
+            if not Invincibility then
+                Lives = Lives - 1
+                if Lives <= 0 then
+                    Gameover = true
+                    love.audio.play(Death)
+                else
+                    Points = Points + 200 -- bonus for eating a ghost
+                    return Points
+                end
             end
         end
     end
 end
 -- need to add teleportation man :(, AI is gonna kill me
+-- text that says "move to start the game"
