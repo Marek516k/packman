@@ -12,8 +12,7 @@ function CanMove(tempX, tempY)
 end
 
 function love.load()
-    Packman = {
-    { x = 8, y = 10 }
+    Packman = { x = 8, y = 10
 }
     Ghosts = {
     { x = 11, y = 10, type = "blinky" },
@@ -22,9 +21,9 @@ function love.load()
     { x = 10, y = 10, type = "clyde" }
 }
     Font_size = love.graphics.newFont(25)
-    Death = love.audio.newSource("Death.wav", "static")
-    CherryAlert = love.audio.newSource("cherry.wav", "static")
-    Song = love.audio.newSource("Song.mp3", "stream")
+    --Death = love.audio.newSource("Death.wav", "static")
+    --CherryAlert = love.audio.newSource("cherry.wav", "static")
+    --Song = love.audio.newSource("Song.mp3", "stream")
     GridSize = 32
     Lives = 2
     Points = 0
@@ -32,8 +31,9 @@ function love.load()
     Timer = 0
     Interval = 0.4
     Gameover = false
+    Gamestarted = false
     Invincibility = false
-    love.window.setTitle("Packman - but worse edition")
+    love.window.setTitle("Pack man - but worse edition")
     love.window.setMode(800, 600, { resizable = false, vsync = true })
     Font_size = love.graphics.newFont(20)
     Packman_image = love.graphics.newImage("packman.png")
@@ -53,7 +53,7 @@ function love.update(dt)
         Cherry_delay = Cherry_delay + dt -- Timer for spawning cherries
         if Timer >= Interval then
             Timer = 0
-            local player = Packman[1]
+            local player = Packman
             local newX, newY = player.x, player.y
             local tempX, tempY = newX, newY
             if NextDir == "right" then tempX = tempX + 1 end
@@ -69,7 +69,7 @@ function love.update(dt)
             if Dir == "down" then newY = newY + 1 end
             player.x = newX
             player.y = newY
-            --love.checkColl(Ghosts)
+            love.checkColl()
         end
     end
 end
@@ -84,6 +84,7 @@ function love.draw()
                 love.graphics.draw(Wall_image, drawX, drawY)
             elseif tile == "." then
                 love.graphics.draw(Point_image, drawX, drawY)
+            --elseif tile == "t" then  -- teleportation tile, not implemented yet
             elseif tile == "C" then
                 love.graphics.draw(Cherry_image, drawX, drawY)
             elseif tile == "o" then
@@ -97,30 +98,45 @@ function love.draw()
             elseif tile == "c" then
                 love.graphics.draw(Clyde_image, drawX, drawY)
             elseif tile == "P" then
-                local player = Packman[1]
+                local player = Packman
                 love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
-                
             end
         end
     end
         love.graphics.setFont(Font_size)
-        love.graphics.setColor(1, 0, 0, 1)
+        love.graphics.setColor(1, 0, 0, 1) --red
         local PointsText = "Points: " .. tostring(Points)
         local textWidth = Font_size:getWidth(PointsText)
         love.graphics.print(PointsText, love.graphics.getWidth() - textWidth - 10, 10)
         love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
         if Gameover then
             love.graphics.setFont(Font_size)
-            love.graphics.setColor(1, 0, 0, 1) --red
+            love.graphics.setColor(0, 1, 0, 1)
             love.graphics.printf("YOU LOST, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+            love.graphics.setColor(1, 1, 1, 1)
         end
-    end
+        if Gamestarted then
+           -- love.audio.play(Started)
+        else
+            love.graphics.setColor(0, 1, 0, 1)
+            love.graphics.printf("Move to start the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+            love.graphics.setColor(1, 1, 1, 1)
+        end
+end
 
 function love.keypressed(key)
-    if key == "d" then NextDir = "right" end
-    if key == "a" then NextDir = "left" end
-    if key == "w" then NextDir = "up" end
-    if key == "s" then NextDir = "down" end
+    if key == "d" then NextDir = "right"
+        Gamestarted = true
+    end
+    if key == "a" then NextDir = "left"
+        Gamestarted = true
+    end
+    if key == "w" then NextDir = "up"
+        Gamestarted = true
+    end
+    if key == "s" then NextDir = "down"
+        Gamestarted = true    
+    end
     if key == "r" and Gameover then
         love.event.quit("restart")
         Gameover = false
@@ -131,12 +147,15 @@ function love.checkColl()
     --needs to be fixed cuz ts is bad
     for i = 1, #Ghosts do
         local ghost = Ghosts[i]
-        if ghost.x == Packman[1].x and ghost.y == Packman[1].y then
+        if ghost.x == Packman.x and ghost.y == Packman.y then
             if not Invincibility then
                 Lives = Lives - 1
-                if Lives <= 0 then
+                --love.audio.play(Hit)
+                    Packman = { x = 8, y = 10
+                }
+                if Lives == 0 then
+                    --love.audio.play(Death)
                     Gameover = true
-                    love.audio.play(Death)
                 else
                     Points = Points + 200 -- bonus for eating a ghost
                     return Points
