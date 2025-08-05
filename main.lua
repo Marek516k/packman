@@ -24,6 +24,9 @@ function love.load()
     --Death = love.audio.newSource("Death.wav", "static")
     --CherryAlert = love.audio.newSource("cherry.wav", "static")
     --Song = love.audio.newSource("Song.mp3", "stream")
+    --Hit = love.audio.newSource("hit.wav", "static")
+    --CherryEaten = love.audio.newSource("cherryEaten.wav", "static)
+    --Started = love.audio.newSource("started.wav", "static")
     GridSize = 32
     Lives = 2
     Points = 0
@@ -34,12 +37,12 @@ function love.load()
     Gamestarted = false
     Invincibility = false
     love.window.setTitle("Pack man - but worse edition")
-    love.window.setMode(800, 600, { resizable = false, vsync = true })
+    love.window.setMode(800, 600, { resizable = false, vsync = false })
     Font_size = love.graphics.newFont(20)
     Packman_image = love.graphics.newImage("packman.png")
     Point_image = love.graphics.newImage("point.png")
     Wall_image = love.graphics.newImage("wall.png")
-    Cherry_image = love.graphics.newImage("cherry.png")
+    Cherry = love.graphics.newImage("cherry.png")
     BigPoint_image = love.graphics.newImage("bigPoint.png")
     Blinky_image = love.graphics.newImage("blinky.png")
     Inky_image = love.graphics.newImage("inky.png")
@@ -70,11 +73,30 @@ function love.update(dt)
             player.x = newX
             player.y = newY
             love.checkColl()
+            if Cherry_delay > 10 and not Cherry_pos then
+                Cherry_pos = {
+                    x = 10 , y = 12
+                }
+                Cherry_timer = 0
+            end
+            if Cherry_pos then
+                Cherry_timer = Cherry_timer + dt
+                if Cherry_timer > 5 then
+                    Cherry_pos = nil
+                    Cherry_delay = 0
+                end
+            end
         end
     end
 end
 
 function love.draw()
+    local player = Packman
+    love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
+    if Cherry_Pos then
+        love.graphics.draw(Cherry, Cherry_pos.x * GridSize, Cherry_pos.y * GridSize)
+    end
+
     local currentLevel = level[1]
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
@@ -85,8 +107,6 @@ function love.draw()
             elseif tile == "." then
                 love.graphics.draw(Point_image, drawX, drawY)
             --elseif tile == "t" then  -- teleportation tile, not implemented yet
-            elseif tile == "C" then
-                love.graphics.draw(Cherry_image, drawX, drawY)
             elseif tile == "o" then
                 love.graphics.draw(BigPoint_image, drawX, drawY)
             elseif tile == "b" then 
@@ -97,10 +117,8 @@ function love.draw()
                 love.graphics.draw(Pinky_image, drawX, drawY)
             elseif tile == "c" then
                 love.graphics.draw(Clyde_image, drawX, drawY)
-            elseif tile == "P" then
-                local player = Packman
-                love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
             end
+
         end
     end
         love.graphics.setFont(Font_size)
@@ -144,7 +162,7 @@ function love.keypressed(key)
 end
 
 function love.checkColl()
-    --needs to be fixed cuz ts is bad
+    --mby i will adjust this later, but for now it works
     for i = 1, #Ghosts do
         local ghost = Ghosts[i]
         if ghost.x == Packman.x and ghost.y == Packman.y then
@@ -156,12 +174,18 @@ function love.checkColl()
                 if Lives == 0 then
                     --love.audio.play(Death)
                     Gameover = true
-                else
-                    Points = Points + 200 -- bonus for eating a ghost
-                    return Points
-                end
+                    end
+            else
+                Points = Points + 200 -- bonus for eating a ghost
+                return Points
             end
         end
+    end
+    if Cherry_Pos and Cherry_pos.x == Packman.x and Cherry_pos.y ==Packman.y then
+        --love.audio.play(CherryEaten)
+        Points = Points + 100
+        Cherry_delay = 0
+        Cherry_Pos = nil
     end
 end
 -- need to add teleportation man :(, AI is gonna kill me
