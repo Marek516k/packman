@@ -1,4 +1,4 @@
-level = {
+Level = {
     {
         map = {
             "#########################",
@@ -119,4 +119,4 @@ level = {
         }
     }
 }
-return level
+return Level

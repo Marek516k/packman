@@ -11,7 +11,7 @@ function CanMove(tempX, tempY)
 end
 
 function love.load()
-    level = require("levels")
+    Level = require("Levels")
 
     Packman = {
         x = 8,
@@ -51,6 +51,9 @@ function love.load()
     Lives = 2
     Points = 0
     Cherry_delay = 0
+    Cherry_timer = 0
+    Cherry_Pos = nil
+    Cherry_con = false
     Timer = 0
     Interval = 0.4
     Gameover = false
@@ -71,74 +74,78 @@ function love.load()
 end
 
 function love.update(dt)
-    Timer = Timer + dt
-    Cherry_delay = Cherry_delay + dt -- Timer for spawning cherries
-    if Timer >= Interval and not Gameover then
+    if Gamestarted then
+        Timer = Timer + dt
+        Cherry_delay = Cherry_delay + dt -- Timer for spawning cherries
+        if Timer >= Interval and not Gameover then
 
-        Timer = 0
-        local player = Packman
-        local newX, newY = player.x, player.y
-        local tempX, tempY = newX, newY
+            Timer = 0
+            local player = Packman
+            local newX, newY = player.x, player.y
+            local tempX, tempY = newX, newY
 
-        if NextDir == "right" then
-            tempX = tempX + 1
-        end
-        if NextDir == "left" then
-            tempX = tempX - 1
+            if NextDir == "right" then
+                tempX = tempX + 1
             end
-        if NextDir == "up" then
-            tempY = tempY - 1
+            if NextDir == "left" then
+                tempX = tempX - 1
+                end
+            if NextDir == "up" then
+                tempY = tempY - 1
+                end
+            if NextDir == "down" then
+                tempY = tempY + 1
             end
-        if NextDir == "down" then
-            tempY = tempY + 1
+
+            if CanMove(tempX, tempY) then
+                Dir = NextDir
+            end
+
+            if Dir == "right" then
+                newX = newX + 1
+            end
+            if Dir == "left" then
+                newX = newX - 1
+            end
+            if Dir == "up" then
+                newY = newY - 1
+            end
+            if Dir == "down" then
+                newY = newY + 1
+            end
+
+            player.x = newX
+            player.y = newY
+        end
+        if Cherry_delay > 10 and not Cherry_con then
+                Cherry_con = true
+                Cherry_Pos = {
+                    x = 10, y = 12
+                }
+                Cherry_timer = 0
         end
 
-        if CanMove(tempX, tempY) then
-            Dir = NextDir
-        end
-
-        if Dir == "right" then
-            newX = newX + 1
-        end
-        if Dir == "left" then
-            newX = newX - 1
-        end
-        if Dir == "up" then
-            newY = newY - 1
-        end
-        if Dir == "down" then
-            newY = newY + 1
-        end
-
-        player.x = newX
-        player.y = newY
-        love.checkColl()
-
-        if Cherry_delay > 10 and not Cherry_pos then
-            Cherry_pos = {
-                x = 10, y = 12
-            }
-            Cherry_timer = 0
-        end
-
-        if Cherry_pos then
+        if Cherry_con then
             Cherry_timer = Cherry_timer + dt
             if Cherry_timer > 5 then
-                Cherry_pos = nil
+                Cherry_Pos = nil
+                Cherry_con = false
                 Cherry_delay = 0
+                Cherry_timer = 0
             end
         end
+        love.checkColl()
     end
 end
-
+    
 function love.draw()
     local player = Packman
     love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
-    if Cherry_Pos then
-        love.graphics.draw(Cherry, Cherry_pos.x * GridSize, Cherry_pos.y * GridSize)
+    if Cherry_con and Cherry_Pos then
+        love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
     end
 
-    local currentLevel = level[1]
+    local currentLevel = Level[1]
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
@@ -231,10 +238,12 @@ function love.checkColl()
         end
     end
 
-    if Cherry_Pos and Cherry_pos.x == Packman.x and Cherry_pos.y == Packman.y then
+    if Cherry_con and Cherry_Pos.x == Packman.x and Cherry_Pos.y == Packman.y then
         --love.audio.play(CherryEaten)
         Points = Points + 100
         Cherry_delay = 0
+        Cherry_con = false
+        Cherry_timer = 0
         Cherry_Pos = nil
     end
 end
