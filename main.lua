@@ -1,6 +1,7 @@
 love = require("love")
 
 function Key_cashe(dir)
+
     if dir == "right" then return 1, 0
     end
     if dir == "left" then return -1, 0
@@ -9,15 +10,18 @@ function Key_cashe(dir)
     end
     if dir == "down" then return 0, 1
     end
+
     return 0, 0
 end
 
 function Is_wall(x, y)
+
     for _, wall in ipairs(Walls) do
         if wall.x - 1 == x and wall.y - 1 == y then
             return true
         end
     end
+    
     return false
 end
 
@@ -53,16 +57,29 @@ function love.load()
         }
     }
 
-    Canmove = true
+    love.window.setTitle("Pack man - but worse edition")
+    love.window.setMode(800, 600, { resizable = false, vsync = true })
     Font_size = love.graphics.newFont(25)
     Death = love.audio.newSource("sounds/Death.wav", "static")
     CherryAlert = love.audio.newSource("sounds/cherryAlert.wav", "static")
     Song = love.audio.newSource("sounds/Song.wav", "stream")
+    Song:setLooping(true)
     Hit = love.audio.newSource("sounds/hit.wav", "static")
     CherryEaten = love.audio.newSource("sounds/cherryEaten.wav", "static")
     Point_eaten = love.audio.newSource("sounds/point_pickedup.wav", "static")
     Bigpoint_eaten = love.audio.newSource("sounds/bigpoint.wav", "static")
     Victory = love.audio.newSource("sounds/victory.wav", "static")
+    Font_size = love.graphics.newFont(20)
+    Packman_image = love.graphics.newImage("sprites/packman.png")
+    Point_image = love.graphics.newImage("sprites/point.png")
+    Wall_image = love.graphics.newImage("sprites/wall.png")
+    Cherry = love.graphics.newImage("sprites/cherry.png")
+    BigPoint_image = love.graphics.newImage("sprites/bigPoint.png")
+    Blinky_image = love.graphics.newImage("sprites/blinky.png")
+    Inky_image = love.graphics.newImage("sprites/inky.png")
+    Pinky_image = love.graphics.newImage("sprites/pinky.png")
+    Clyde_image = love.graphics.newImage("sprites/clyde.png")
+    Canmove = true
     GridSize = 32
     Lives = 2
     Points = 0
@@ -75,23 +92,12 @@ function love.load()
     Gameover = false
     Gamestarted = false
     Invincibility = false
-    love.window.setTitle("Pack man - but worse edition")
-    love.window.setMode(800, 600, { resizable = false, vsync = true })
-    Font_size = love.graphics.newFont(20)
-    Packman_image = love.graphics.newImage("sprites/packman.png")
-    Point_image = love.graphics.newImage("sprites/point.png")
-    Wall_image = love.graphics.newImage("sprites/wall.png")
-    Cherry = love.graphics.newImage("sprites/cherry.png")
-    BigPoint_image = love.graphics.newImage("sprites/bigPoint.png")
-    Blinky_image = love.graphics.newImage("sprites/blinky.png")
-    Inky_image = love.graphics.newImage("sprites/inky.png")
-    Pinky_image = love.graphics.newImage("sprites/pinky.png")
-    Clyde_image = love.graphics.newImage("sprites/clyde.png")
     Collectibles = {}
     Invincibility_timer = 0
     Walls = {}
 
     local currentLevel = Level[1]
+
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
@@ -104,6 +110,7 @@ function love.load()
             end
         end
     end
+
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
@@ -166,14 +173,15 @@ function love.update(dt)
     end
 end
 
-    
 function love.draw()
+
     local player = Packman
     love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
     if Cherry_con and Cherry_Pos and not Gameover then
         love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
         love.audio.play(CherryAlert)
     end
+
     for _, point in ipairs(Collectibles) do
         local drawX = (point.x - 1) * GridSize
         local drawY = (point.y - 1) * GridSize
@@ -183,12 +191,15 @@ function love.draw()
             love.graphics.draw(BigPoint_image, drawX, drawY)
         end
     end
+
     local currentLevel = Level[1]
+
     for _, wall in ipairs(Walls) do
         local drawX = (wall.x - 1) * GridSize
         local drawY = (wall.y - 1) * GridSize
         love.graphics.draw(Wall_image, drawX, drawY)
     end
+
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
@@ -204,6 +215,7 @@ function love.draw()
             end
         end
     end
+
     love.graphics.setFont(Font_size)
     love.graphics.setColor(1, 0, 0, 1) --red
     local PointsText = "Points: " .. tostring(Points)
@@ -218,8 +230,12 @@ function love.draw()
         love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1, 1)
     end
+
     if not Gamestarted then
-        love.audio.play(Song)
+        if not Song:isPlaying() then
+            love.audio.play(Song)
+    end
+
         love.graphics.setColor(0, 1, 0, 1)
         love.graphics.printf("Move to start the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1, 1)
@@ -227,6 +243,7 @@ function love.draw()
 end
 
 function love.keypressed(key)
+
     if key == "d" then
         NextDir = "right"
         Gamestarted = true
@@ -250,6 +267,7 @@ function love.keypressed(key)
 end
 
 function love.checkColl()
+
     for i = 1, #Ghosts do
         local ghost = Ghosts[i]
         if ghost.x == Packman.x and ghost.y == Packman.y then
@@ -258,6 +276,7 @@ function love.checkColl()
                 if Lives > 0 then
                 love.audio.play(Hit)
                 end
+
                 Packman = {
                     x = 8,
                     y = 10
@@ -267,6 +286,7 @@ function love.checkColl()
                     love.audio.play(Death)
                     Gameover = true
                 end
+
             else
                 Points = Points + 200 -- bonus for eating a ghost
                 return Points
