@@ -1,13 +1,24 @@
 love = require("love")
 
-function CanMove(tempX, tempY)
-    --prechecking if the player can move
-    --[[
-        return false
-    else
-        return true
-    end ]]
-    return true
+function Key_cashe(dir)
+    if dir == "right" then return 1, 0
+    end
+    if dir == "left" then return -1, 0
+    end
+    if dir == "up" then return 0, -1
+    end
+    if dir == "down" then return 0, 1
+    end
+    return 0, 0
+end
+
+function Is_wall(x, y)
+    for _, wall in ipairs(Walls) do
+        if wall.x - 1 == x and wall.y - 1 == y then
+            return true
+        end
+    end
+    return false
 end
 
 function love.load()
@@ -15,7 +26,8 @@ function love.load()
 
     Packman = {
         x = 8,
-        y = 10
+        y = 10,
+        dir = nil
     }
 
     Ghosts = {
@@ -40,6 +52,8 @@ function love.load()
             type = "clyde"
         }
     }
+
+    Canmove = true
     Font_size = love.graphics.newFont(25)
     Death = love.audio.newSource("sounds/Death.wav", "static")
     CherryAlert = love.audio.newSource("sounds/cherryAlert.wav", "static")
@@ -75,6 +89,8 @@ function love.load()
     Clyde_image = love.graphics.newImage("sprites/clyde.png")
     Collectibles = {}
     Invincibility_timer = 0
+    Walls = {}
+
     local currentLevel = Level[1]
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
@@ -88,58 +104,52 @@ function love.load()
             end
         end
     end
+    for y, row in ipairs(currentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            if tile == "#" then
+                table.insert(Walls, {
+                    x = x,
+                    y = y
+                })
+            end
+        end
+    end
 end
 
 function love.update(dt)
     if Gamestarted then
         Timer = Timer + dt
-        Cherry_delay = Cherry_delay + dt -- Timer for spawning cherries
-        if Timer >= Interval and not Gameover then
+        Cherry_delay = Cherry_delay + dt
 
+        if Timer >= Interval and not Gameover then
             Timer = 0
             local player = Packman
-            local newX, newY = player.x, player.y
-            local tempX, tempY = newX, newY
+            local x, y = player.x, player.y
 
-            if NextDir == "right" then
-                tempX = tempX + 1
-            end
-            if NextDir == "left" then
-                tempX = tempX - 1
+            if NextDir then
+                local dx, dy = Key_cashe(NextDir)
+                if not Is_wall(x + dx, y + dy) then
+                    player.dir = NextDir
+                    NextDir = nil
                 end
-            if NextDir == "up" then
-                tempY = tempY - 1
+            end
+
+            if player.dir then
+                local dx, dy = Key_cashe(player.dir)
+                if not Is_wall(x + dx, y + dy) then
+                    player.x = x + dx
+                    player.y = y + dy
                 end
-            if NextDir == "down" then
-                tempY = tempY + 1
             end
-
-            if CanMove(tempX, tempY) then
-                Dir = NextDir
-            end
-
-            if Dir == "right" then
-                newX = newX + 1
-            end
-            if Dir == "left" then
-                newX = newX - 1
-            end
-            if Dir == "up" then
-                newY = newY - 1
-            end
-            if Dir == "down" then
-                newY = newY + 1
-            end
-
-            player.x = newX
-            player.y = newY
         end
+
         if Cherry_delay > 10 and not Cherry_con then
-                Cherry_con = true
-                Cherry_Pos = {
-                    x = 10, y = 12
-                }
-                Cherry_timer = 0
+            Cherry_con = true
+            Cherry_Pos = {
+                x = 10, y = 12
+            }
+            Cherry_timer = 0
         end
 
         if Cherry_con then
@@ -151,9 +161,11 @@ function love.update(dt)
                 Cherry_timer = 0
             end
         end
+
         love.checkColl()
     end
 end
+
     
 function love.draw()
     local player = Packman
@@ -172,13 +184,16 @@ function love.draw()
         end
     end
     local currentLevel = Level[1]
+    for _, wall in ipairs(Walls) do
+        local drawX = (wall.x - 1) * GridSize
+        local drawY = (wall.y - 1) * GridSize
+        love.graphics.draw(Wall_image, drawX, drawY)
+    end
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
-            local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize
-            if tile == "#" then
-                love.graphics.draw(Wall_image, drawX, drawY)             --elseif tile == "t" then  -- teleportation tile, not implemented yet
-            elseif tile == "b" then
+            local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize             --elseif tile == "t" then  -- teleportation tile, not implemented yet
+            if tile == "b" then
                 love.graphics.draw(Blinky_image, drawX, drawY)
             elseif tile == "i" then
                 love.graphics.draw(Inky_image, drawX, drawY)
@@ -235,7 +250,6 @@ function love.keypressed(key)
 end
 
 function love.checkColl()
-    --mby i will adjust this later, but for now it works
     for i = 1, #Ghosts do
         local ghost = Ghosts[i]
         if ghost.x == Packman.x and ghost.y == Packman.y then
@@ -283,4 +297,4 @@ function love.checkColl()
     end
 end
 
--- need to add teleportation man :(, AI is gonna kill me, cherry spaws need minor adjustments to support more locations
+-- need to add teleportation man :(, AI is gonna kill me, cherry spaws need minor adjustments to support more locations, music loop soon, slightly readable code later
