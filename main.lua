@@ -73,6 +73,21 @@ function love.load()
     Inky_image = love.graphics.newImage("sprites/inky.png")
     Pinky_image = love.graphics.newImage("sprites/pinky.png")
     Clyde_image = love.graphics.newImage("sprites/clyde.png")
+    Collectibles = {}
+    Invincibility_timer = 0
+    local currentLevel = Level[1]
+    for y, row in ipairs(currentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            if tile == "." or tile == "o" then
+                table.insert(Collectibles, {
+                    x = x,
+                    y = y,
+                    type = tile
+                })
+            end
+        end
+    end
 end
 
 function love.update(dt)
@@ -147,18 +162,22 @@ function love.draw()
         love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
         love.audio.play(CherryAlert)
     end
+    for _, point in ipairs(Collectibles) do
+        local drawX = (point.x - 1) * GridSize
+        local drawY = (point.y - 1) * GridSize
+        if point.type == "." then
+            love.graphics.draw(Point_image, drawX, drawY)
+        elseif point.type == "o" then
+            love.graphics.draw(BigPoint_image, drawX, drawY)
+        end
+    end
     local currentLevel = Level[1]
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
             local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize
             if tile == "#" then
-                love.graphics.draw(Wall_image, drawX, drawY)
-            elseif tile == "." then
-                love.graphics.draw(Point_image, drawX, drawY)
-                --elseif tile == "t" then  -- teleportation tile, not implemented yet
-            elseif tile == "o" then
-                love.graphics.draw(BigPoint_image, drawX, drawY)
+                love.graphics.draw(Wall_image, drawX, drawY)             --elseif tile == "t" then  -- teleportation tile, not implemented yet
             elseif tile == "b" then
                 love.graphics.draw(Blinky_image, drawX, drawY)
             elseif tile == "i" then
@@ -170,7 +189,6 @@ function love.draw()
             end
         end
     end
-
     love.graphics.setFont(Font_size)
     love.graphics.setColor(1, 0, 0, 1) --red
     local PointsText = "Points: " .. tostring(Points)
@@ -250,7 +268,19 @@ function love.checkColl()
         Cherry_timer = 0
         Cherry_Pos = nil
     end
+
+    for i = #Collectibles, 1, -1 do
+        local point = Collectibles[i]
+        if point.x - 1 == Packman.x and point.y - 1 == Packman.y then
+            if point.type == "." then
+                Points = Points + 10
+            elseif point.type == "o" then
+                Points = Points + 50
+                Invincibility = true
+            end
+            table.remove(Collectibles, i)
+        end
+    end
 end
 
--- need to add teleportation man :(, AI is gonna kill me
--- text that says "move to start the game"
+-- need to add teleportation man :(, AI is gonna kill me, cherry spaws need minor adjustments to support more locations
