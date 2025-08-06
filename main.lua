@@ -41,12 +41,14 @@ function love.load()
         }
     }
     Font_size = love.graphics.newFont(25)
-    --Death = love.audio.newSource("Death.wav", "static")
-    --CherryAlert = love.audio.newSource("cherry.wav", "static")
-    --Song = love.audio.newSource("Song.mp3", "stream")
-    --Hit = love.audio.newSource("hit.wav", "static")
-    --CherryEaten = love.audio.newSource("cherryEaten.wav", "static)
-    --Started = love.audio.newSource("started.wav", "static")
+    Death = love.audio.newSource("sounds/Death.wav", "static")
+    CherryAlert = love.audio.newSource("sounds/cherryAlert.wav", "static")
+    Song = love.audio.newSource("sounds/Song.wav", "stream")
+    Hit = love.audio.newSource("sounds/hit.wav", "static")
+    CherryEaten = love.audio.newSource("sounds/cherryEaten.wav", "static")
+    Point_eaten = love.audio.newSource("sounds/point_pickedup.wav", "static")
+    Bigpoint_eaten = love.audio.newSource("sounds/bigpoint.wav", "static")
+    Victory = love.audio.newSource("sounds/victory.wav", "static")
     GridSize = 32
     Lives = 2
     Points = 0
@@ -60,7 +62,7 @@ function love.load()
     Gamestarted = false
     Invincibility = false
     love.window.setTitle("Pack man - but worse edition")
-    love.window.setMode(800, 600, { resizable = false, vsync = false })
+    love.window.setMode(800, 600, { resizable = false, vsync = true })
     Font_size = love.graphics.newFont(20)
     Packman_image = love.graphics.newImage("sprites/packman.png")
     Point_image = love.graphics.newImage("sprites/point.png")
@@ -141,10 +143,10 @@ end
 function love.draw()
     local player = Packman
     love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
-    if Cherry_con and Cherry_Pos then
+    if Cherry_con and Cherry_Pos and not Gameover then
         love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
+        love.audio.play(CherryAlert)
     end
-
     local currentLevel = Level[1]
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
@@ -183,9 +185,8 @@ function love.draw()
         love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1, 1)
     end
-    if Gamestarted then
-        -- love.audio.play(Started)
-    else
+    if not Gamestarted then
+        love.audio.play(Song)
         love.graphics.setColor(0, 1, 0, 1)
         love.graphics.printf("Move to start the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1, 1)
@@ -222,13 +223,16 @@ function love.checkColl()
         if ghost.x == Packman.x and ghost.y == Packman.y then
             if not Invincibility then
                 Lives = Lives - 1
-                --love.audio.play(Hit)
+                if Lives > 0 then
+                love.audio.play(Hit)
+                end
                 Packman = {
                     x = 8,
                     y = 10
                 }
                 if Lives == 0 then
-                    --love.audio.play(Death)
+                    love.audio.stop(Song)
+                    love.audio.play(Death)
                     Gameover = true
                 end
             else
@@ -239,7 +243,7 @@ function love.checkColl()
     end
 
     if Cherry_con and Cherry_Pos.x == Packman.x and Cherry_Pos.y == Packman.y then
-        --love.audio.play(CherryEaten)
+        love.audio.play(CherryEaten)
         Points = Points + 100
         Cherry_delay = 0
         Cherry_con = false
