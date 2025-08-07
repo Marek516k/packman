@@ -21,7 +21,7 @@ function Is_wall(x, y)
             return true
         end
     end
-    
+
     return false
 end
 
@@ -69,7 +69,6 @@ function love.load()
     Point_eaten = love.audio.newSource("sounds/point_pickedup.wav", "static")
     Bigpoint_eaten = love.audio.newSource("sounds/bigpoint.wav", "static")
     Victory = love.audio.newSource("sounds/victory.wav", "static")
-    Font_size = love.graphics.newFont(20)
     Packman_image = love.graphics.newImage("sprites/packman.png")
     Point_image = love.graphics.newImage("sprites/point.png")
     Wall_image = love.graphics.newImage("sprites/wall.png")
@@ -79,7 +78,6 @@ function love.load()
     Inky_image = love.graphics.newImage("sprites/inky.png")
     Pinky_image = love.graphics.newImage("sprites/pinky.png")
     Clyde_image = love.graphics.newImage("sprites/clyde.png")
-    Canmove = true
     GridSize = 32
     Lives = 2
     Points = 0
@@ -95,8 +93,42 @@ function love.load()
     Collectibles = {}
     Invincibility_timer = 0
     Walls = {}
-
+    Teleports = {}
+    
+    local teleportSpots = {}
     local currentLevel = Level[1]
+    for y, row in ipairs(currentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            if tile == "t" then
+                table.insert(teleportSpots, {
+                    x = x,
+                    y = y
+                })
+            end
+        end
+    end
+
+    for i = 1, #teleportSpots, 2 do
+        local a = teleportSpots[i]
+        local b = teleportSpots[i + 1]
+        if b then
+
+            table.insert(Teleports, {
+                x = a.x,
+                y = a.y,
+                tx = b.x,
+                ty = b.y
+            })
+
+            table.insert(Teleports, { 
+                x = b.x,
+                y = b.y,
+                tx = a.x,
+                ty = a.y
+            })
+        end
+    end
 
     for y, row in ipairs(currentLevel.map) do
         for x = 1, #row do
@@ -149,6 +181,13 @@ function love.update(dt)
                     player.y = y + dy
                 end
             end
+            for _, tp in ipairs(Teleports) do
+                if Packman.x + 1 == tp.x and Packman.y + 1 == tp.y then
+                    Packman.x = tp.tx -1
+                    Packman.y = tp.ty -1
+                    break
+                end
+            end
         end
 
         if Cherry_delay > 10 and not Cherry_con then
@@ -175,14 +214,18 @@ end
 
 function love.draw()
 
+love.graphics.setColor(1, 1, 1) -- reset
+
     local player = Packman
     love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
+    
     if Cherry_con and Cherry_Pos and not Gameover then
         love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
         love.audio.play(CherryAlert)
     end
 
     for _, point in ipairs(Collectibles) do
+
         local drawX = (point.x - 1) * GridSize
         local drawY = (point.y - 1) * GridSize
         if point.type == "." then
@@ -234,8 +277,7 @@ function love.draw()
     if not Gamestarted then
         if not Song:isPlaying() then
             love.audio.play(Song)
-    end
-
+        end
         love.graphics.setColor(0, 1, 0, 1)
         love.graphics.printf("Move to start the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1, 1)
@@ -274,13 +316,14 @@ function love.checkColl()
             if not Invincibility then
                 Lives = Lives - 1
                 if Lives > 0 then
-                love.audio.play(Hit)
+                    love.audio.play(Hit)
                 end
 
                 Packman = {
                     x = 8,
                     y = 10
                 }
+
                 if Lives == 0 then
                     love.audio.stop(Song)
                     love.audio.play(Death)
@@ -312,6 +355,7 @@ function love.checkColl()
                 Points = Points + 50
                 Invincibility = true
             end
+
             table.remove(Collectibles, i)
         end
     end
