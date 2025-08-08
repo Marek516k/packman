@@ -4,10 +4,13 @@ function Key_cashe(dir)
 
     if dir == "right" then return 1, 0
     end
+
     if dir == "left" then return -1, 0
     end
+
     if dir == "up" then return 0, -1
     end
+
     if dir == "down" then return 0, 1
     end
 
@@ -26,6 +29,7 @@ function Is_wall(x, y)
 end
 
 function love.load()
+
     Level = require("Levels")
 
     Packman = {
@@ -94,10 +98,12 @@ function love.load()
     Invincibility_timer = 0
     Walls = {}
     Teleports = {}
-    
+    Number_of_collectibles = 0
+
     local teleportSpots = {}
-    local currentLevel = Level[1]
-    for y, row in ipairs(currentLevel.map) do
+    CurrentLevel = Level[1]
+    
+    for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
             if tile == "t" then
@@ -121,7 +127,7 @@ function love.load()
                 ty = b.y
             })
 
-            table.insert(Teleports, { 
+            table.insert(Teleports, {
                 x = b.x,
                 y = b.y,
                 tx = a.x,
@@ -130,10 +136,11 @@ function love.load()
         end
     end
 
-    for y, row in ipairs(currentLevel.map) do
+    for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
             if tile == "." or tile == "o" then
+                Number_of_collectibles = Number_of_collectibles + 1
                 table.insert(Collectibles, {
                     x = x,
                     y = y,
@@ -143,7 +150,7 @@ function love.load()
         end
     end
 
-    for y, row in ipairs(currentLevel.map) do
+    for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
             if tile == "#" then
@@ -157,6 +164,7 @@ function love.load()
 end
 
 function love.update(dt)
+
     if Gamestarted then
         Timer = Timer + dt
         Cherry_delay = Cherry_delay + dt
@@ -181,6 +189,7 @@ function love.update(dt)
                     player.y = y + dy
                 end
             end
+
             for _, tp in ipairs(Teleports) do
                 if Packman.x + 1 == tp.x and Packman.y + 1 == tp.y then
                     Packman.x = tp.tx -1
@@ -225,7 +234,6 @@ love.graphics.setColor(1, 1, 1) -- reset
     end
 
     for _, point in ipairs(Collectibles) do
-
         local drawX = (point.x - 1) * GridSize
         local drawY = (point.y - 1) * GridSize
         if point.type == "." then
@@ -235,7 +243,7 @@ love.graphics.setColor(1, 1, 1) -- reset
         end
     end
 
-    local currentLevel = Level[1]
+    local CurrentLevel = Level[1]
 
     for _, wall in ipairs(Walls) do
         local drawX = (wall.x - 1) * GridSize
@@ -243,10 +251,10 @@ love.graphics.setColor(1, 1, 1) -- reset
         love.graphics.draw(Wall_image, drawX, drawY)
     end
 
-    for y, row in ipairs(currentLevel.map) do
+    for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
-            local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize             --elseif tile == "t" then  -- teleportation tile, not implemented yet
+            local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize
             if tile == "b" then
                 love.graphics.draw(Blinky_image, drawX, drawY)
             elseif tile == "i" then
@@ -290,18 +298,22 @@ function love.keypressed(key)
         NextDir = "right"
         Gamestarted = true
     end
+
     if key == "a" then
         NextDir = "left"
         Gamestarted = true
     end
+    
     if key == "w" then
         NextDir = "up"
         Gamestarted = true
     end
+
     if key == "s" then
         NextDir = "down"
         Gamestarted = true
     end
+
     if key == "r" and Gameover then
         love.event.quit("restart")
         Gameover = false
@@ -351,14 +363,22 @@ function love.checkColl()
         if point.x - 1 == Packman.x and point.y - 1 == Packman.y then
             if point.type == "." then
                 Points = Points + 10
+                love.audio.play(Point_eaten)
             elseif point.type == "o" then
                 Points = Points + 50
+                love.audio.play(Bigpoint_eaten)
                 Invincibility = true
             end
-
+            Number_of_collectibles = Number_of_collectibles - 1
             table.remove(Collectibles, i)
+
+            if Number_of_collectibles == 200 then
+                love.audio.play(Victory)
+                love.audio.stop(Song)
+                CurrentLevel = Level[1 + 1]
+            end
         end
     end
 end
 
--- need to add teleportation man :(, AI is gonna kill me, cherry spaws need minor adjustments to support more locations, music loop soon, slightly readable code later
+-- AI is gonna kill me, cherry spaws need minor adjustments to support more locations
