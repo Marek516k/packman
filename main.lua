@@ -39,7 +39,8 @@ function Level_control()
     Cherry_timer = 0
     Cherry_Pos = nil
     Cherry_con = false
-
+    CherrySpots = {}
+    
     Packman = {
         x = 8,
         y = 10,
@@ -101,6 +102,8 @@ function Level_control()
                     x = x,
                     y = y
                 })
+            elseif tile == "C" then
+                table.insert(CherrySpots, { x = x - 1, y = y - 1 })
             end
         end
     end
@@ -204,11 +207,10 @@ function love.update(dt)
             end
         end
 
-        if Cherry_delay > 10 and not Cherry_con then
+        if Cherry_delay > 10 and not Cherry_con and #CherrySpots > 0 then
             Cherry_con = true
-            Cherry_Pos = {
-                x = 10, y = 12
-            }
+            local spot = CherrySpots[love.math.random(#CherrySpots)] -- náhodné místo
+            Cherry_Pos = { x = spot.x, y = spot.y }
             Cherry_timer = 0
         end
 
@@ -219,6 +221,12 @@ function love.update(dt)
                 Cherry_con = false
                 Cherry_delay = 0
                 Cherry_timer = 0
+            end
+        end
+        if Invincibility then
+            Invincibility_timer = Invincibility_timer - dt
+            if Invincibility_timer <= 0 then
+                Invincibility = false
             end
         end
 
@@ -364,18 +372,19 @@ function love.checkColl()
     for i = #Collectibles, 1, -1 do
         local point = Collectibles[i]
         if point.x - 1 == Packman.x and point.y - 1 == Packman.y then
-            if point.type == "." then
+            if point.type == "." then             
                 Points = Points + 10
                 love.audio.play(Point_eaten)
             elseif point.type == "o" then
                 Points = Points + 50
                 love.audio.play(Bigpoint_eaten)
                 Invincibility = true
+                Invincibility_timer = 6
             end
             Number_of_collectibles = Number_of_collectibles - 1
             table.remove(Collectibles, i)
 
-            if Number_of_collectibles == 204 then
+            if Number_of_collectibles == 200 then
 
                 NextLevel = NextLevel + 1
                 CurrentLevel = Level[NextLevel]
