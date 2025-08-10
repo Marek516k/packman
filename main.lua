@@ -28,15 +28,89 @@ function Is_wall(x, y)
     return false
 end
 
-function love.load()
+function Level_control()
 
-    Level = require("Levels")
+    Collectibles = {}
+    Teleports = {}
+    TeleportSpots = {}
+    Walls = {}
+    Number_of_collectibles = 0
+    Cherry_delay = 0
+    Cherry_timer = 0
+    Cherry_Pos = nil
+    Cherry_con = false
 
     Packman = {
         x = 8,
         y = 10,
         dir = nil
     }
+
+    for y, row in ipairs(CurrentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            if tile == "t" then
+                table.insert(TeleportSpots, {
+                    x = x,
+                    y = y
+                })
+            end
+        end
+    end
+
+    for i = 1, #TeleportSpots, 2 do
+        local a = TeleportSpots[i]
+        local b = TeleportSpots[i + 1]
+        if b then
+
+            table.insert(Teleports, {
+                x = a.x,
+                y = a.y,
+                tx = b.x,
+                ty = b.y
+            })
+
+            table.insert(Teleports, {
+                x = b.x,
+                y = b.y,
+                tx = a.x,
+                ty = a.y
+            })
+        end
+    end
+
+    for y, row in ipairs(CurrentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            if tile == "." or tile == "o" then
+                Number_of_collectibles = Number_of_collectibles + 1
+                table.insert(Collectibles, {
+                    x = x,
+                    y = y,
+                    type = tile
+                })
+            end
+        end
+    end
+
+    for y, row in ipairs(CurrentLevel.map) do
+        for x = 1, #row do
+            local tile = row:sub(x, x)
+            if tile == "#" then
+                table.insert(Walls, {
+                    x = x,
+                    y = y
+                })
+            end
+        end
+    end
+end
+
+function love.load()
+
+    Level = require("Levels")
+    NextLevel = 1
+    CurrentLevel = Level[NextLevel]
 
     Ghosts = {
         {
@@ -85,82 +159,13 @@ function love.load()
     GridSize = 32
     Lives = 2
     Points = 0
-    Cherry_delay = 0
-    Cherry_timer = 0
-    Cherry_Pos = nil
-    Cherry_con = false
     Timer = 0
     Interval = 0.4
     Gameover = false
     Gamestarted = false
     Invincibility = false
-    Collectibles = {}
     Invincibility_timer = 0
-    Walls = {}
-    Teleports = {}
-    Number_of_collectibles = 0
-
-    local teleportSpots = {}
-    CurrentLevel = Level[1]
-    
-    for y, row in ipairs(CurrentLevel.map) do
-        for x = 1, #row do
-            local tile = row:sub(x, x)
-            if tile == "t" then
-                table.insert(teleportSpots, {
-                    x = x,
-                    y = y
-                })
-            end
-        end
-    end
-
-    for i = 1, #teleportSpots, 2 do
-        local a = teleportSpots[i]
-        local b = teleportSpots[i + 1]
-        if b then
-
-            table.insert(Teleports, {
-                x = a.x,
-                y = a.y,
-                tx = b.x,
-                ty = b.y
-            })
-
-            table.insert(Teleports, {
-                x = b.x,
-                y = b.y,
-                tx = a.x,
-                ty = a.y
-            })
-        end
-    end
-
-    for y, row in ipairs(CurrentLevel.map) do
-        for x = 1, #row do
-            local tile = row:sub(x, x)
-            if tile == "." or tile == "o" then
-                Number_of_collectibles = Number_of_collectibles + 1
-                table.insert(Collectibles, {
-                    x = x,
-                    y = y,
-                    type = tile
-                })
-            end
-        end
-    end
-
-    for y, row in ipairs(CurrentLevel.map) do
-        for x = 1, #row do
-            local tile = row:sub(x, x)
-            if tile == "#" then
-                table.insert(Walls, {
-                    x = x,
-                    y = y
-                })
-            end
-        end
-    end
+    Level_control()
 end
 
 function love.update(dt)
@@ -242,8 +247,6 @@ love.graphics.setColor(1, 1, 1) -- reset
             love.graphics.draw(BigPoint_image, drawX, drawY)
         end
     end
-
-    local CurrentLevel = Level[1]
 
     for _, wall in ipairs(Walls) do
         local drawX = (wall.x - 1) * GridSize
@@ -343,7 +346,7 @@ function love.checkColl()
                 end
 
             else
-                Points = Points + 200 -- bonus for eating a ghost
+                Points = Points + 190 -- bonus for eating a ghost
                 return Points
             end
         end
@@ -372,10 +375,14 @@ function love.checkColl()
             Number_of_collectibles = Number_of_collectibles - 1
             table.remove(Collectibles, i)
 
-            if Number_of_collectibles == 200 then
+            if Number_of_collectibles == 204 then
+
+                NextLevel = NextLevel + 1
+                CurrentLevel = Level[NextLevel]
                 love.audio.play(Victory)
                 love.audio.stop(Song)
-                CurrentLevel = Level[1 + 1]
+                Gamestarted = false
+                Level_control()
             end
         end
     end
