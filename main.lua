@@ -1,4 +1,5 @@
 love = require("love")
+require("AI-stuff")
 
 function Key_cashe(dir)
 
@@ -179,22 +180,22 @@ function love.update(dt)
 
         if Timer >= Interval and not Gameover then
             Timer = 0
-            local player = Packman
-            local x, y = player.x, player.y
+            local Player = Packman
+            local x, y = Player.x, Player.y
 
             if NextDir then
                 local dx, dy = Key_cashe(NextDir)
                 if not Is_wall(x + dx, y + dy) then
-                    player.dir = NextDir
+                    Player.dir = NextDir
                     NextDir = nil
                 end
             end
 
-            if player.dir then
-                local dx, dy = Key_cashe(player.dir)
+            if Player.dir then
+                local dx, dy = Key_cashe(Player.dir)
                 if not Is_wall(x + dx, y + dy) then
-                    player.x = x + dx
-                    player.y = y + dy
+                    Player.x = x + dx
+                    Player.y = y + dy
                 end
             end
 
@@ -205,6 +206,7 @@ function love.update(dt)
                     break
                 end
             end
+            AI(Packman.x, Packman.y, Ghosts)
         end
 
         if Cherry_delay > 10 and not Cherry_con and #CherrySpots > 0 then
@@ -229,7 +231,6 @@ function love.update(dt)
                 Invincibility = false
             end
         end
-
         love.checkColl()
     end
 end
@@ -238,8 +239,8 @@ function love.draw()
 
 love.graphics.setColor(1, 1, 1) -- reset
 
-    local player = Packman
-    love.graphics.draw(Packman_image, player.x * GridSize, player.y * GridSize)
+    local Player = Packman
+    love.graphics.draw(Packman_image, Player.x * GridSize, Player.y * GridSize)
     
     if Cherry_con and Cherry_Pos and not Gameover then
         love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
@@ -262,19 +263,17 @@ love.graphics.setColor(1, 1, 1) -- reset
         love.graphics.draw(Wall_image, drawX, drawY)
     end
 
-    for y, row in ipairs(CurrentLevel.map) do
-        for x = 1, #row do
-            local tile = row:sub(x, x)
-            local drawX, drawY = (x - 1) * GridSize, (y - 1) * GridSize
-            if tile == "b" then
-                love.graphics.draw(Blinky_image, drawX, drawY)
-            elseif tile == "i" then
-                love.graphics.draw(Inky_image, drawX, drawY)
-            elseif tile == "p" then
-                love.graphics.draw(Pinky_image, drawX, drawY)
-            elseif tile == "c" then
-                love.graphics.draw(Clyde_image, drawX, drawY)
-            end
+    for _, ghost in ipairs(Ghosts) do
+        local drawX = (ghost.x) * GridSize
+        local drawY = (ghost.y) * GridSize
+        if ghost.type == "blinky" then
+            love.graphics.draw(Blinky_image, drawX, drawY)
+        elseif ghost.type == "inky" then
+            love.graphics.draw(Inky_image, drawX, drawY)
+        elseif ghost.type == "pinky" then
+            love.graphics.draw(Pinky_image, drawX, drawY)
+        elseif ghost.type == "clyde" then
+            love.graphics.draw(Clyde_image, drawX, drawY)
         end
     end
 
