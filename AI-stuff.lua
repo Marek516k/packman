@@ -11,58 +11,66 @@ function Is_wall(x, y)
 end
 
 function blinkyAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-        Ghost.x = Ghost.x + 1
-    elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-        Ghost.x = Ghost.x - 1
-    end
-
-    if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-        Ghost.y = Ghost.y + 1
-    elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-        Ghost.y = Ghost.y - 1
+    if Ghost.x ~= Packman_x then
+        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
+            Ghost.x = Ghost.x + 1
+        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
+            Ghost.x = Ghost.x - 1
+        end
+    else
+        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
+            Ghost.y = Ghost.y + 1
+        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
+            Ghost.y = Ghost.y - 1
+        end
     end
 end
 
 function inkyAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-        Ghost.x = Ghost.x + 1
-    elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-        Ghost.x = Ghost.x - 1
-    end
-
-    if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-        Ghost.y = Ghost.y + 1
-    elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-        Ghost.y = Ghost.y - 1
+    if Ghost.x ~= Packman_x then
+        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
+            Ghost.x = Ghost.x + 1
+        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
+            Ghost.x = Ghost.x - 1
+        end
+    else
+        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
+            Ghost.y = Ghost.y + 1
+        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
+            Ghost.y = Ghost.y - 1
+        end
     end
 end
 
 function pinkyAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-        Ghost.x = Ghost.x + 1
-    elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-        Ghost.x = Ghost.x - 1
-    end
-
-    if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-        Ghost.y = Ghost.y + 1
-    elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-        Ghost.y = Ghost.y - 1
+    if Ghost.x ~= Packman_x then
+        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
+            Ghost.x = Ghost.x + 1
+        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
+            Ghost.x = Ghost.x - 1
+        end
+    else
+        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
+            Ghost.y = Ghost.y + 1
+        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
+            Ghost.y = Ghost.y - 1
+        end
     end
 end
 
 function clydeAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-        Ghost.x = Ghost.x + 1
-    elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-        Ghost.x = Ghost.x - 1
-    end
-
-    if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-        Ghost.y = Ghost.y + 1
-    elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-        Ghost.y = Ghost.y - 1
+    if Ghost.x ~= Packman_x then
+        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
+            Ghost.x = Ghost.x + 1
+        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
+            Ghost.x = Ghost.x - 1
+        end
+    else
+        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
+            Ghost.y = Ghost.y + 1
+        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
+            Ghost.y = Ghost.y - 1
+        end
     end
 end
 

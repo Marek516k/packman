@@ -48,6 +48,29 @@ function Level_control()
         dir = nil
     }
 
+    Ghosts = {
+        {
+            x = 11,
+            y = 10,
+            type = "blinky"
+        },
+        {
+            x = 11,
+            y = 9,
+            type = "inky"
+        },
+        {
+            x = 10,
+            y = 9,
+            type = "pinky"
+        },
+        {
+            x = 10,
+            y = 10,
+            type = "clyde"
+        }
+    }
+
     for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
@@ -115,29 +138,6 @@ function love.load()
     Level = require("Levels")
     NextLevel = 1
     CurrentLevel = Level[NextLevel]
-
-    Ghosts = {
-        {
-            x = 11,
-            y = 10,
-            type = "blinky"
-        },
-        {
-            x = 11,
-            y = 9,
-            type = "inky"
-        },
-        {
-            x = 10,
-            y = 9,
-            type = "pinky"
-        },
-        {
-            x = 10,
-            y = 10,
-            type = "clyde"
-        }
-    }
 
     love.window.setTitle("Pack man - but worse edition")
     love.window.setMode(800, 600, { resizable = false, vsync = true })
