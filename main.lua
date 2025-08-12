@@ -206,7 +206,11 @@ function love.update(dt)
                     break
                 end
             end
-            AI(Packman.x, Packman.y, Ghosts)
+            AICollision()
+            blinkyAI(Packman.x, Packman.y, Ghosts[1])
+            inkyAI(Packman.x, Packman.y, Ghosts[2])
+            pinkyAI(Packman.x, Packman.y, Ghosts[3])
+            clydeAI(Packman.x, Packman.y, Ghosts[4])
         end
 
         if Cherry_delay > 10 and not Cherry_con and #CherrySpots > 0 then
@@ -231,7 +235,7 @@ function love.update(dt)
                 Invincibility = false
             end
         end
-        love.checkColl()
+        checkColl()
     end
 end
 
@@ -330,7 +334,7 @@ function love.keypressed(key)
     end
 end
 
-function love.checkColl()
+function checkColl()
 
     for i = 1, #Ghosts do
         local ghost = Ghosts[i]
