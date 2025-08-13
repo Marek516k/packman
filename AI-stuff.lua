@@ -10,71 +10,81 @@ function Is_wall(x, y)
     return false
 end
 
-function blinkyAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x ~= Packman_x then
-        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-            Ghost.x = Ghost.x + 1
-        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-            Ghost.x = Ghost.x - 1
-        end
-    else
-        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-            Ghost.y = Ghost.y + 1
-        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-            Ghost.y = Ghost.y - 1
+local function shuffleInPlace(t, startIndex)
+
+    for i = #t, startIndex, -1 do
+        local j = love.math.random(startIndex, i)
+        t[i], t[j] = t[j], t[i]
+    end
+end
+
+local function stepIfFree(g, dx, dy)
+    if not Is_wall(g.x + dx, g.y + dy) then
+        g.x = g.x + dx
+        g.y = g.y + dy
+        g.lastdx, g.lastdy = dx, dy
+        return true
+    end
+    return false
+end
+
+local function buildPriorityList(Px, Py, G)
+    local list = {}
+    -- 1st: horizontal toward Pac-Man
+    table.insert(list, {x = (Px > G.x) and 1 or -1, y = 0})
+    -- 2nd: vertical toward Pac-Man
+    table.insert(list, {x = 0, y = (Py > G.y) and 1 or -1})
+    -- 3rd & 4th: the opposite directions
+    table.insert(list, {x = -list[1].x, y = 0})
+    table.insert(list, {x = 0, y = -list[2].y})
+    shuffleInPlace(list, 3)
+    return list
+end
+
+function blinkyAI(Px, Py, G)
+    local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
+    local priorities = buildPriorityList(Px, Py, G)
+    for _, d in ipairs(priorities) do
+        -- skip reverse unless it’s the only way
+        if not (d.x == revx and d.y == revy) or #priorities == 1 then
+            if stepIfFree(G, d.x, d.y) then return end
         end
     end
 end
 
-function inkyAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x ~= Packman_x then
-        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-            Ghost.x = Ghost.x + 1
-        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-            Ghost.x = Ghost.x - 1
-        end
-    else
-        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-            Ghost.y = Ghost.y + 1
-        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-            Ghost.y = Ghost.y - 1
+function inkyAI(Px, Py, G)
+    local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
+    local priorities = buildPriorityList(Px, Py, G)
+    for _, d in ipairs(priorities) do
+        if not (d.x == revx and d.y == revy) or #priorities == 1 then
+            if stepIfFree(G, d.x, d.y) then return end
         end
     end
 end
 
-function pinkyAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x ~= Packman_x then
-        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-            Ghost.x = Ghost.x + 1
-        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-            Ghost.x = Ghost.x - 1
-        end
-    else
-        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-            Ghost.y = Ghost.y + 1
-        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-            Ghost.y = Ghost.y - 1
+function pinkyAI(Px, Py, G)
+    local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
+    local priorities = buildPriorityList(Px, Py, G)
+    for _, d in ipairs(priorities) do
+        if not (d.x == revx and d.y == revy) or #priorities == 1 then
+            if stepIfFree(G, d.x, d.y) then return end
         end
     end
 end
 
-function clydeAI(Packman_x, Packman_y, Ghost)
-    if Ghost.x ~= Packman_x then
-        if Ghost.x < Packman_x and not Is_wall(Ghost.x + 1, Ghost.y) then
-            Ghost.x = Ghost.x + 1
-        elseif Ghost.x > Packman_x and not Is_wall(Ghost.x - 1, Ghost.y) then
-            Ghost.x = Ghost.x - 1
-        end
-    else
-        if Ghost.y < Packman_y and not Is_wall(Ghost.x, Ghost.y + 1) then
-            Ghost.y = Ghost.y + 1
-        elseif Ghost.y > Packman_y and not Is_wall(Ghost.x, Ghost.y - 1) then
-            Ghost.y = Ghost.y - 1
+function clydeAI(Px, Py, G)
+    local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
+    local priorities = buildPriorityList(Px, Py, G)
+    for _, d in ipairs(priorities) do
+        if not (d.x == revx and d.y == revy) or #priorities == 1 then
+            if stepIfFree(G, d.x, d.y) then return end
         end
     end
 end
 
-function AICollision()
-end
-
-return clydeAI, pinkyAI, inkyAI, blinkyAI
+return {
+    blinkyAI = blinkyAI,
+    inkyAI = inkyAI,
+    pinkyAI = pinkyAI,
+    clydeAI = clydeAI,
+}

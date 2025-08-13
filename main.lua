@@ -135,6 +135,7 @@ end
 
 function love.load()
 
+    love.math.setRandomSeed(os.time())
     Level = require("Levels")
     NextLevel = 1
     CurrentLevel = Level[NextLevel]
@@ -206,7 +207,6 @@ function love.update(dt)
                     break
                 end
             end
-            AICollision()
             blinkyAI(Packman.x, Packman.y, Ghosts[1])
             inkyAI(Packman.x, Packman.y, Ghosts[2])
             pinkyAI(Packman.x, Packman.y, Ghosts[3])
