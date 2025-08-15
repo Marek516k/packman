@@ -30,6 +30,13 @@ function Is_wall(x, y)
 end
 
 function Level_control()
+    
+    if NextLevel == 6 then
+        love.audio.play(Victory)
+        love.audio.stop(Song)
+        Trueend = true
+        Gamestarted = false
+    end
 
     Collectibles = {}
     Teleports = {}
@@ -137,7 +144,8 @@ function love.load()
 
     love.math.setRandomSeed(os.time())
     Level = require("Levels")
-    NextLevel = 1
+    Trueend = false
+    NextLevel = 5
     CurrentLevel = Level[NextLevel]
 
     love.window.setTitle("Pack man - but worse edition")
@@ -175,11 +183,11 @@ end
 
 function love.update(dt)
 
-    if Gamestarted then
+    if Gamestarted and not Trueend then
         Timer = Timer + dt
         Cherry_delay = Cherry_delay + dt
 
-        if Timer >= Interval and not Gameover then
+        if Timer >= Interval and not Gameover and not Trueend then
             Timer = 0
             local Player = Packman
             local x, y = Player.x, Player.y
@@ -288,7 +296,7 @@ love.graphics.setColor(1, 1, 1) -- reset
     love.graphics.print(PointsText, love.graphics.getWidth() - textWidth - 10, 10)
     love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
 
-    if Gameover then
+    if Gameover and not Trueend then
         love.graphics.setFont(Font_size)
         love.graphics.setColor(0, 1, 0, 1)
         love.graphics.printf("YOU LOST, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20,
@@ -296,12 +304,19 @@ love.graphics.setColor(1, 1, 1) -- reset
         love.graphics.setColor(1, 1, 1, 1)
     end
 
-    if not Gamestarted then
+    if not Gamestarted and not Trueend then
         if not Song:isPlaying() then
             love.audio.play(Song)
         end
         love.graphics.setColor(0, 1, 0, 1)
         love.graphics.printf("Move to start the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+    if Trueend then
+        love.graphics.setFont(Font_size)
+        love.graphics.setColor(0, 1, 0, 1)
+        love.graphics.printf("YOU WON, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20,
+        love.graphics.getWidth(), "center")
         love.graphics.setColor(1, 1, 1, 1)
     end
 end
@@ -328,9 +343,10 @@ function love.keypressed(key)
         Gamestarted = true
     end
 
-    if key == "r" and Gameover then
+    if key == "r" and (Gameover or Trueend) then
         love.event.quit("restart")
         Gameover = false
+        Trueend = false
     end
 end
 
@@ -343,6 +359,8 @@ function checkColl()
                 Lives = Lives - 1
                 if Lives > 0 then
                     love.audio.play(Hit)
+                        Invincibility = true
+                        Invincibility_timer = 2
                 end
 
                 Packman = {
@@ -388,16 +406,14 @@ function checkColl()
             table.remove(Collectibles, i)
 
             if Number_of_collectibles == 200 then
-
                 NextLevel = NextLevel + 1
                 CurrentLevel = Level[NextLevel]
-                love.audio.play(Victory)
                 love.audio.stop(Song)
                 Gamestarted = false
                 Level_control()
+                return
+                
             end
         end
     end
 end
-
--- AI is gonna kill me, cherry spaws need minor adjustments to support more locations
