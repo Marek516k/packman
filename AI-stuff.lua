@@ -1,5 +1,3 @@
-require("levels")
-
 function Is_wall(x, y)
     for _, wall in ipairs(Walls) do
         if wall.x - 1 == x and wall.y - 1 == y then
@@ -42,6 +40,10 @@ local function buildPriorityList(Px, Py, G)
 end
 
 function blinkyAI(Px, Py, G)
+    if G.state == "respawning" then
+        return -- skip movement while ghost is paused at base
+    end
+
     local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
     local priorities = buildPriorityList(Px, Py, G)
     for _, d in ipairs(priorities) do
@@ -53,6 +55,10 @@ function blinkyAI(Px, Py, G)
 end
 
 function inkyAI(Px, Py, G)
+    if G.state == "respawning" then
+        return -- skip movement while ghost is paused at base
+    end
+
     local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
     local priorities = buildPriorityList(Px, Py, G)
     for _, d in ipairs(priorities) do
@@ -63,6 +69,10 @@ function inkyAI(Px, Py, G)
 end
 
 function pinkyAI(Px, Py, G)
+    if G.state == "respawning" then
+        return -- skip movement while ghost is paused at base
+    end
+
     local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
     local priorities = buildPriorityList(Px, Py, G)
     for _, d in ipairs(priorities) do
@@ -73,6 +83,10 @@ function pinkyAI(Px, Py, G)
 end
 
 function clydeAI(Px, Py, G)
+    if G.state == "respawning" then
+        return -- skip movement while ghost is paused at base
+    end
+
     local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
     local priorities = buildPriorityList(Px, Py, G)
     for _, d in ipairs(priorities) do

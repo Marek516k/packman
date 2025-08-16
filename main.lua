@@ -1,6 +1,6 @@
 love = require("love")
-require("AI-stuff")
 Level = require("Levels")
+AI = require("AI-stuff")
 
 function Key_cashe(dir)
 
@@ -40,14 +40,11 @@ function Is_wall(x, y)
     return false
 end
 
-function Ghost_pos(ghostType)
-    for _, ghost in ipairs(Ghosts) do
-        if ghost.type == ghostType then
-            ghost.x = ghost.baseX
-            ghost.y = ghost.baseY
-            break
-        end
-    end
+function Ghost_pos(ghost)
+    ghost.x = ghost.baseX
+    ghost.y = ghost.baseY
+    ghost.state = "normal"
+    ghost.respawnTimer = nil
 end
 
 function Level_control()
@@ -80,22 +77,26 @@ function Level_control()
         {
             x = 11, y = 10,
             baseX = 11, baseY = 10,
-            type = "blinky"
+            type = "blinky",
+            state = "normal"
         },
         {
             x = 11, y = 9,
             baseX = 11, baseY = 9,
-            type = "inky"
+            type = "inky",
+            state = "normal"
         },
         {
             x = 10, y = 9,
             baseX = 10, baseY = 9,
-            type = "pinky"
+            type = "pinky",
+            state = "normal"
         },
         {
             x = 10, y = 10,
             baseX = 10, baseY = 10,
-            type = "clyde"
+            type = "clyde",
+            state = "normal"
         }
     }
     if NextLevel == 5 then
@@ -103,22 +104,26 @@ function Level_control()
             {
                 x = 13, y = 12,
                 baseX = 13, baseY = 12,
-                type = "blinky"
+                type = "blinky",
+                state = "normal"
             },
             {
                 x = 13, y = 11,
                 baseX = 13, baseY = 11,
-                type = "inky"
+                type = "inky",
+                state = "normal"
             },
             {
                 x = 10, y = 11,
                 baseX = 10, baseY = 11,
-                type = "pinky"
+                type = "pinky",
+                state = "normal"
             },
             {
                 x = 10, y = 12,
                 baseX = 10, baseY = 12,
-                type = "clyde"
+                type = "clyde",
+                state = "normal"
             }
         }
     end
@@ -286,7 +291,17 @@ function love.update(dt)
                 Invincibility = false
             end
         end
+
         checkColl()
+        for _, ghost in ipairs(Ghosts) do
+            if ghost.state == "respawning" and ghost.respawnTimer then
+                ghost.respawnTimer = ghost.respawnTimer - dt
+                if ghost.respawnTimer <= 0 then
+                    ghost.state = "normal"
+                    ghost.respawnTimer = nil
+                end
+            end
+        end
     end
 end
 
@@ -423,8 +438,10 @@ function checkColl()
             else
                 Points = Points + 200 -- bonus for eating a ghost
                 love.audio.play(Ghost_death)
-                Ghost_pos(ghost.type)
-                return Points
+                ghost.x = ghost.baseX
+                ghost.y = ghost.baseY
+                ghost.state = "respawning"
+                ghost.respawnTimer = 2
             end
         end
     end
@@ -463,7 +480,7 @@ function checkColl()
                 Gamestarted = false
                 Level_control()
                 return
-                
+
             end
         end
     end
