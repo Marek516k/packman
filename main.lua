@@ -1,4 +1,4 @@
-love = require("love")
+Love = require("Love")
 Level = require("Levels")
 AI = require("AI-stuff")
 
@@ -19,7 +19,7 @@ function Key_cashe(dir)
     return 0, 0
 end
 
-function handleTeleport(entity)
+function Teleport_handler(entity)
     for _, tp in ipairs(Teleports) do
         if entity.x + 1 == tp.x and entity.y + 1 == tp.y then
             entity.x = tp.tx - 1
@@ -50,8 +50,8 @@ end
 function Level_control()
 
     if NextLevel == 6 then
-        love.audio.play(Victory)
-        love.audio.stop(Song)
+        Love.audio.play(Victory)
+        Love.audio.stop(Song)
         Trueend = true
         Gamestarted = false
     end
@@ -190,34 +190,34 @@ function Level_control()
     end
 end
 
-function love.load()
+function Love.load()
 
     Trueend = false
     NextLevel = 5
     CurrentLevel = Level[NextLevel]
 
-    love.window.setTitle("Pack man - but worse edition")
-    love.window.setMode(800, 600, { resizable = false, vsync = true })
-    Font_size = love.graphics.newFont(25)
-    Death = love.audio.newSource("sounds/Death.wav", "static")
-    CherryAlert = love.audio.newSource("sounds/cherryAlert.wav", "static")
-    Song = love.audio.newSource("sounds/Song.wav", "stream")
+    Love.window.setTitle("Pack man - but worse edition")
+    Love.window.setMode(800, 600, { resizable = false, vsync = true })
+    Font_size = Love.graphics.newFont(25)
+    Death = Love.audio.newSource("sounds/Death.wav", "static")
+    CherryAlert = Love.audio.newSource("sounds/cherryAlert.wav", "static")
+    Song = Love.audio.newSource("sounds/Song.wav", "stream")
     Song:setLooping(true)
-    Hit = love.audio.newSource("sounds/hit.wav", "static")
-    CherryEaten = love.audio.newSource("sounds/cherryEaten.wav", "static")
-    Point_eaten = love.audio.newSource("sounds/point_pickedup.wav", "static")
-    Bigpoint_eaten = love.audio.newSource("sounds/bigpoint.wav", "static")
-    Victory = love.audio.newSource("sounds/victory.wav", "static")
-    Ghost_death = love.audio.newSource("sounds/ghost_death.wav", "static")
-    Packman_image = love.graphics.newImage("sprites/packman.png")
-    Point_image = love.graphics.newImage("sprites/point.png")
-    Wall_image = love.graphics.newImage("sprites/wall.png")
-    Cherry = love.graphics.newImage("sprites/cherry.png")
-    BigPoint_image = love.graphics.newImage("sprites/bigPoint.png")
-    Blinky_image = love.graphics.newImage("sprites/blinky.png")
-    Inky_image = love.graphics.newImage("sprites/inky.png")
-    Pinky_image = love.graphics.newImage("sprites/pinky.png")
-    Clyde_image = love.graphics.newImage("sprites/clyde.png")
+    Hit = Love.audio.newSource("sounds/hit.wav", "static")
+    CherryEaten = Love.audio.newSource("sounds/cherryEaten.wav", "static")
+    Point_eaten = Love.audio.newSource("sounds/point_pickedup.wav", "static")
+    Bigpoint_eaten = Love.audio.newSource("sounds/bigpoint.wav", "static")
+    Victory = Love.audio.newSource("sounds/victory.wav", "static")
+    Ghost_death = Love.audio.newSource("sounds/ghost_death.wav", "static")
+    Packman_image = Love.graphics.newImage("sprites/packman.png")
+    Point_image = Love.graphics.newImage("sprites/point.png")
+    Wall_image = Love.graphics.newImage("sprites/wall.png")
+    Cherry = Love.graphics.newImage("sprites/cherry.png")
+    BigPoint_image = Love.graphics.newImage("sprites/bigPoint.png")
+    Blinky_image = Love.graphics.newImage("sprites/blinky.png")
+    Inky_image = Love.graphics.newImage("sprites/inky.png")
+    Pinky_image = Love.graphics.newImage("sprites/pinky.png")
+    Clyde_image = Love.graphics.newImage("sprites/clyde.png")
     GridSize = 32
     Lives = 2
     Points = 0
@@ -230,7 +230,7 @@ function love.load()
     Level_control()
 end
 
-function love.update(dt)
+function Love.update(dt)
 
     if Gamestarted and not Trueend then
         Timer = Timer + dt
@@ -257,25 +257,27 @@ function love.update(dt)
                 end
             end
 
-            handleTeleport(Packman)
+            Teleport_handler(Packman)
 
             blinkyAI(Packman.x, Packman.y, Ghosts[1])
             inkyAI(Packman.x, Packman.y, Ghosts[2])
             pinkyAI(Packman.x, Packman.y, Ghosts[3])
             clydeAI(Packman.x, Packman.y, Ghosts[4])
+
             for _, ghost in ipairs(Ghosts) do
-                handleTeleport(ghost)
+                Teleport_handler(ghost)
             end
         end
 
         if Cherry_delay > 10 and not Cherry_con and #CherrySpots > 0 then
             Cherry_con = true
-            local spot = CherrySpots[love.math.random(#CherrySpots)] -- náhodné místo
+            local spot = CherrySpots[Love.math.random(#CherrySpots)] -- náhodné místo
             Cherry_Pos = { x = spot.x, y = spot.y }
             Cherry_timer = 0
         end
 
         if Cherry_con then
+            Love.audio.play(CherryAlert)
             Cherry_timer = Cherry_timer + dt
             if Cherry_timer > 5 then
                 Cherry_Pos = nil
@@ -292,7 +294,7 @@ function love.update(dt)
             end
         end
 
-        checkColl()
+        CheckColl()
         for _, ghost in ipairs(Ghosts) do
             if ghost.state == "respawning" and ghost.respawnTimer then
                 ghost.respawnTimer = ghost.respawnTimer - dt
@@ -305,83 +307,82 @@ function love.update(dt)
     end
 end
 
-function love.draw()
+function Love.draw()
 
-love.graphics.setColor(1, 1, 1) -- reset
+Love.graphics.setColor(1, 1, 1) -- reset
 
     local Player = Packman
-    love.graphics.draw(Packman_image, Player.x * GridSize, Player.y * GridSize)
+    Love.graphics.draw(Packman_image, Player.x * GridSize, Player.y * GridSize)
     
     if Cherry_con and Cherry_Pos and not Gameover then
-        love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
-        love.audio.play(CherryAlert)
+        Love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
     end
 
     for _, point in ipairs(Collectibles) do
         local drawX = (point.x - 1) * GridSize
         local drawY = (point.y - 1) * GridSize
         if point.type == "." then
-            love.graphics.draw(Point_image, drawX, drawY)
+            Love.graphics.draw(Point_image, drawX, drawY)
         elseif point.type == "o" then
-            love.graphics.draw(BigPoint_image, drawX, drawY)
+            Love.graphics.draw(BigPoint_image, drawX, drawY)
         end
     end
 
     for _, wall in ipairs(Walls) do
         local drawX = (wall.x - 1) * GridSize
         local drawY = (wall.y - 1) * GridSize
-        love.graphics.draw(Wall_image, drawX, drawY)
+        Love.graphics.draw(Wall_image, drawX, drawY)
     end
 
     for _, ghost in ipairs(Ghosts) do
         local drawX = (ghost.x) * GridSize
         local drawY = (ghost.y) * GridSize
         if ghost.type == "blinky" then
-            love.graphics.draw(Blinky_image, drawX, drawY)
+            Love.graphics.draw(Blinky_image, drawX, drawY)
         elseif ghost.type == "inky" then
-            love.graphics.draw(Inky_image, drawX, drawY)
+            Love.graphics.draw(Inky_image, drawX, drawY)
         elseif ghost.type == "pinky" then
-            love.graphics.draw(Pinky_image, drawX, drawY)
+            Love.graphics.draw(Pinky_image, drawX, drawY)
         elseif ghost.type == "clyde" then
-            love.graphics.draw(Clyde_image, drawX, drawY)
+            Love.graphics.draw(Clyde_image, drawX, drawY)
         end
     end
 
-    love.graphics.setFont(Font_size)
-    love.graphics.setColor(1, 0, 0, 1) --red
+    Love.graphics.setFont(Font_size)
+    Love.graphics.setColor(1, 0, 0, 1) --red
     local PointsText = "Points: " .. tostring(Points)
     local textWidth = Font_size:getWidth(PointsText)
-    love.graphics.print(PointsText, love.graphics.getWidth() - textWidth - 10, 10)
-    love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
+    Love.graphics.print(PointsText, Love.graphics.getWidth() - textWidth - 10, 10)
+    Love.graphics.setColor(1, 1, 1, 1) -- reset color to back white
 
     if Gameover and not Trueend then
-        love.graphics.setFont(Font_size)
-        love.graphics.setColor(0, 1, 0, 1)
-        love.graphics.printf("YOU LOST, press r to restart the game", 0, love.graphics.getHeight() / 2 - 20,
-        love.graphics.getWidth(), "center")
-        love.graphics.setColor(1, 1, 1, 1)
+        Love.graphics.setFont(Font_size)
+        Love.graphics.setColor(0, 1, 0, 1)
+        Love.graphics.printf("YOU LOST, press r to restart the game", 0, Love.graphics.getHeight() / 2 - 20,
+        Love.graphics.getWidth(), "center")
+        Love.graphics.setColor(1, 1, 1, 1)
     end
 
     if not Gamestarted and not Trueend then
         if not Song:isPlaying() then
-            love.audio.play(Song)
+            Love.audio.play(Song)
         end
 
-        love.graphics.setColor(0, 1, 0, 1)
-        love.graphics.printf("Move to start the game", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
-        love.graphics.setColor(1, 1, 1, 1)
+        Love.graphics.setColor(0, 1, 0, 1)
+        Love.graphics.printf("Move to start the game", 0, Love.graphics.getHeight() / 2 - 20, Love.graphics.getWidth(), "center")
+        Love.graphics.setColor(1, 1, 1, 1)
     end
 
     if Trueend then
-        love.graphics.setFont(Font_size)
-        love.graphics.setColor(0, 1, 0, 1)
-        love.graphics.printf("Thank you for playing whatever this is but it ends right here .... unless you press r and do it all over again :D", 0, love.graphics.getHeight() / 2 - 20,
-        love.graphics.getWidth(), "center")
-        love.graphics.setColor(1, 1, 1, 1)
+        Love.graphics.setFont(Font_size)
+        Love.graphics.setColor(0, 1, 0, 1)
+        Love.graphics.printf("Thank you for playing whatever this is but it ends right here .... unless you press r and do it all over again :D", 0, Love.graphics.getHeight() / 2 - 20,
+        Love.graphics.getWidth(), "center")
+        Love.graphics.setColor(1, 1, 1, 1)
     end
 end
 
-function love.keypressed(key)
+function Love.keypressed(key)
 
     if key == "d" then
         NextDir = "right"
@@ -404,50 +405,91 @@ function love.keypressed(key)
     end
 
     if key == "r" and (Gameover or Trueend) then
-        love.event.quit("restart")
+        Love.event.quit("restart")
         Gameover = false
         Trueend = false
     end
 end
 
-function checkColl()
+function CheckColl()
 
-    for i = 1, #Ghosts do
-        local ghost = Ghosts[i]
-        if Packman.x == ghost.x and Packman.y == ghost.y then
+    Packman.prevX = Packman.x
+    Packman.prevY = Packman.y
+    Packman.x = Packman.x + Packman.dx
+    Packman.y = Packman.y + Packman.dy
+
+    for _, ghost in ipairs(Ghosts) do
+        ghost.prevX = ghost.x
+        ghost.prevY = ghost.y
+        ghost.x = ghost.x + ghost.dx
+        ghost.y = ghost.y + ghost.dy
+    end
+
+    for _, ghost in ipairs(Ghosts) do
+        if Packman.x == ghost.x and Packman.y == ghost.y then --exact cordinates collision
             if not Invincibility then
                 Lives = Lives - 1
 
                 if Lives > 0 then
-                    love.audio.play(Hit)
+                    Love.audio.play(Hit)
                         Invincibility = true
                         Invincibility_timer = 2
+                        Packman = {
+                            x = 8,
+                            y = 10
+                        }
                 end
 
-                Packman = {
-                    x = 8,
-                    y = 10
-                }
-
                 if Lives == 0 then
-                    love.audio.stop(Song)
-                    love.audio.play(Death)
+                    Love.audio.stop(Song)
+                    Love.audio.play(Death)
                     Gameover = true
                 end
 
-            else
-                Points = Points + 200 -- bonus for eating a ghost
-                love.audio.play(Ghost_death)
-                ghost.x = ghost.baseX
-                ghost.y = ghost.baseY
-                ghost.state = "respawning"
-                ghost.respawnTimer = 2
+                else
+                    Points = Points + 200 -- bonus for eating a ghost
+                    Love.audio.play(Ghost_death)
+                    ghost.x = ghost.baseX
+                    ghost.y = ghost.baseY
+                    ghost.state = "respawning"
+                    ghost.respawnTimer = 2
+                end
+            end
+
+        if Packman.x == ghost.prevX and Packman.y == ghost.prevY and
+           Packman.prevX == ghost.x and Packman.prevY == ghost.y then --head on collision
+            if not Invincibility then
+                Lives = Lives - 1
+
+                if Lives > 0 then
+                    Love.audio.play(Hit)
+                        Invincibility = true
+                        Invincibility_timer = 2
+                        Packman = {
+                            x = 8,
+                            y = 10
+                        }
+                end
+
+                if Lives == 0 then
+                    Love.audio.stop(Song)
+                    Love.audio.play(Death)
+                    Gameover = true
+                end
+
+                else
+                    Points = Points + 200 -- bonus for eating a ghost
+                    Love.audio.play(Ghost_death)
+                    ghost.x = ghost.baseX
+                    ghost.y = ghost.baseY
+                    ghost.state = "respawning"
+                    ghost.respawnTimer = 2
+                end
             end
         end
-    end
 
     if Cherry_con and Cherry_Pos.x == Packman.x and Cherry_Pos.y == Packman.y then
-        love.audio.play(CherryEaten)
+        Love.audio.play(CherryEaten)
         Points = Points + 100
         Cherry_delay = 0
         Cherry_con = false
@@ -461,11 +503,11 @@ function checkColl()
 
             if point.type == "." then             
                 Points = Points + 10
-                love.audio.play(Point_eaten)
+                Love.audio.play(Point_eaten)
 
             elseif point.type == "o" then
                 Points = Points + 50
-                love.audio.play(Bigpoint_eaten)
+                Love.audio.play(Bigpoint_eaten)
                 Invincibility = true
                 Invincibility_timer = 6
             end
@@ -473,15 +515,15 @@ function checkColl()
             Number_of_collectibles = Number_of_collectibles - 1
             table.remove(Collectibles, i)
 
-            if Number_of_collectibles == 0 then
+            if Number_of_collectibles == 200 then
                 NextLevel = NextLevel + 1
                 CurrentLevel = Level[NextLevel]
-                love.audio.stop(Song)
+                Love.audio.stop(Song)
                 Gamestarted = false
                 Level_control()
                 return
-
             end
         end
     end
 end
+--fix AI Pdirs and hope that i didnt break collision detection
