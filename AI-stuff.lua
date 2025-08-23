@@ -46,7 +46,7 @@ local function buildPriorityList(tx, ty, G)
     return list
 end
 
-local function ghostMove(Px, Py, G, priorities)
+local function ghostMove(G, priorities)
 
     if G.state == "respawning" then
         return
@@ -69,16 +69,16 @@ local function ghostMove(Px, Py, G, priorities)
     end
 end
 
-function blinkyAI(Px, Py, G, Pdirx, Pdiry)
+function blinkyAI(Px, Py, G)
     local priorities = buildPriorityList(Px, Py, G)
-    ghostMove(Px, Py, G, priorities)
+    ghostMove(G, priorities)
 end
 
 function pinkyAI(Px, Py, G, Pdirx, Pdiry)
     local targetX = Px + 4 * Pdirx
     local targetY = Py + 4 * Pdiry
     local priorities = buildPriorityList(targetX, targetY, G)
-    ghostMove(Px, Py, G, priorities)
+    ghostMove(G, priorities)
 end
 
 function inkyAI(Px, Py, G, Pdirx, Pdiry, blinky)
@@ -89,10 +89,10 @@ function inkyAI(Px, Py, G, Pdirx, Pdiry, blinky)
     local targetX = blinky.x + vectX
     local targetY = blinky.y + vectY
     local priorities = buildPriorityList(targetX, targetY, G)
-    ghostMove(Px, Py, G, priorities)
+    ghostMove(G, priorities)
 end
 
-function clydeAI(Px, Py, G, Pdirx, Pdiry)
+function clydeAI(Px, Py, G)
     local dx = Px - G.x
     local dy = Py - G.y
     local dist2 = dx*dx + dy*dy
@@ -105,7 +105,7 @@ function clydeAI(Px, Py, G, Pdirx, Pdiry)
     end
 
     local priorities = buildPriorityList(targetX, targetY, G)
-    ghostMove(Px, Py, G, priorities)
+    ghostMove(G, priorities)
 end
 
 return {

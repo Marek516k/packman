@@ -1,4 +1,4 @@
-Love = require("Love")
+Love = require("love")
 Level = require("Levels")
 AI = require("AI-stuff")
 
@@ -9,7 +9,7 @@ function Key_cashe(dir)
 
     if dir == "left" then return -1, 0
     end
-
+    
     if dir == "up" then return 0, -1
     end
 
@@ -17,6 +17,35 @@ function Key_cashe(dir)
     end
 
     return 0, 0
+end
+
+function Love.keypressed(key)
+
+    if key == "d" then
+        NextDir = "right"
+        Gamestarted = true
+    end
+
+    if key == "a" then
+        NextDir = "left"
+        Gamestarted = true
+    end
+    
+    if key == "w" then
+        NextDir = "up"
+        Gamestarted = true
+    end
+
+    if key == "s" then
+        NextDir = "down"
+        Gamestarted = true
+    end
+
+    if key == "r" and (Gameover or Trueend) then
+        Love.event.quit("restart")
+        Gameover = false
+        Trueend = false
+    end
 end
 
 function Teleport_handler(entity)
@@ -68,9 +97,9 @@ function Level_control()
     CherrySpots = {}
     
     Packman = {
-        x = 8,
-        y = 10,
-        dir = nil
+        x = 8, y = 10,
+        dir = nil,
+        dx = 0, dy = 0
     }
 
     Ghosts = {
@@ -78,25 +107,29 @@ function Level_control()
             x = 11, y = 10,
             baseX = 11, baseY = 10,
             type = "blinky",
-            state = "normal"
+            state = "normal",
+            dx = 0, dy = 0
         },
         {
-            x = 11, y = 9,
-            baseX = 11, baseY = 9,
+            x = 12, y = 10,
+            baseX = 12, baseY = 10,
             type = "inky",
-            state = "normal"
+            state = "normal",
+            dx = 0, dy = 0
         },
         {
-            x = 10, y = 9,
-            baseX = 10, baseY = 9,
+            x = 13, y = 10,
+            baseX = 13, baseY = 10,
             type = "pinky",
-            state = "normal"
+            state = "normal",
+            dx = 0, dy = 0
         },
         {
-            x = 10, y = 10,
-            baseX = 10, baseY = 10,
+            x = 14, y = 10,
+            baseX = 14, baseY = 10,
             type = "clyde",
-            state = "normal"
+            state = "normal",
+            dx = 0, dy = 0
         }
     }
     if NextLevel == 5 then
@@ -105,25 +138,29 @@ function Level_control()
                 x = 13, y = 12,
                 baseX = 13, baseY = 12,
                 type = "blinky",
-                state = "normal"
+                state = "normal",
+                dx = 0, dy = 0
             },
             {
                 x = 13, y = 11,
                 baseX = 13, baseY = 11,
                 type = "inky",
-                state = "normal"
+                state = "normal",
+                dx = 0, dy = 0
             },
             {
                 x = 10, y = 11,
                 baseX = 10, baseY = 11,
                 type = "pinky",
-                state = "normal"
+                state = "normal",
+                dx = 0, dy = 0
             },
             {
                 x = 10, y = 12,
                 baseX = 10, baseY = 12,
                 type = "clyde",
-                state = "normal"
+                state = "normal",
+                dx = 0, dy = 0
             }
         }
     end
@@ -193,7 +230,7 @@ end
 function Love.load()
 
     Trueend = false
-    NextLevel = 5
+    NextLevel = 1
     CurrentLevel = Level[NextLevel]
 
     Love.window.setTitle("Pack man - but worse edition")
@@ -238,30 +275,32 @@ function Love.update(dt)
 
         if Timer >= Interval and not Gameover and not Trueend then
             Timer = 0
-            local Player = Packman
-            local x, y = Player.x, Player.y
+            local x, y = Packman.x, Packman.y
 
             if NextDir then
                 local dx, dy = Key_cashe(NextDir)
                 if not Is_wall(x + dx, y + dy) then
-                    Player.dir = NextDir
+                    Packman.dir = NextDir
                     NextDir = nil
                 end
             end
 
-            if Player.dir then
-                local dx, dy = Key_cashe(Player.dir)
+            if Packman.dir then
+                local dx, dy = Key_cashe(Packman.dir)
                 if not Is_wall(x + dx, y + dy) then
-                    Player.x = x + dx
-                    Player.y = y + dy
+                    Packman.x = x + dx
+                    Packman.y = y + dy
+                else
+                    Packman.dx = 0
+                    Packman.dy = 0
                 end
             end
 
             Teleport_handler(Packman)
 
             blinkyAI(Packman.x, Packman.y, Ghosts[1])
-            inkyAI(Packman.x, Packman.y, Ghosts[2])
-            pinkyAI(Packman.x, Packman.y, Ghosts[3])
+            inkyAI(Packman.x, Packman.y, Ghosts[2], Packman.dx, Packman.dy, Ghosts[1])
+            pinkyAI(Packman.x, Packman.y, Ghosts[3], Packman.dx, Packman.dy)
             clydeAI(Packman.x, Packman.y, Ghosts[4])
 
             for _, ghost in ipairs(Ghosts) do
@@ -311,8 +350,7 @@ function Love.draw()
 
 Love.graphics.setColor(1, 1, 1) -- reset
 
-    local Player = Packman
-    Love.graphics.draw(Packman_image, Player.x * GridSize, Player.y * GridSize)
+    Love.graphics.draw(Packman_image, Packman.x * GridSize, Packman.y * GridSize)
     
     if Cherry_con and Cherry_Pos and not Gameover then
         Love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
@@ -382,47 +420,15 @@ Love.graphics.setColor(1, 1, 1) -- reset
     end
 end
 
-function Love.keypressed(key)
-
-    if key == "d" then
-        NextDir = "right"
-        Gamestarted = true
-    end
-
-    if key == "a" then
-        NextDir = "left"
-        Gamestarted = true
-    end
-    
-    if key == "w" then
-        NextDir = "up"
-        Gamestarted = true
-    end
-
-    if key == "s" then
-        NextDir = "down"
-        Gamestarted = true
-    end
-
-    if key == "r" and (Gameover or Trueend) then
-        Love.event.quit("restart")
-        Gameover = false
-        Trueend = false
-    end
-end
-
 function CheckColl()
-
     Packman.prevX = Packman.x
     Packman.prevY = Packman.y
-    Packman.x = Packman.x + Packman.dx
-    Packman.y = Packman.y + Packman.dy
 
     for _, ghost in ipairs(Ghosts) do
         ghost.prevX = ghost.x
         ghost.prevY = ghost.y
-        ghost.x = ghost.x + ghost.dx
-        ghost.y = ghost.y + ghost.dy
+        ghost.x = ghost.x + (ghost.dx or 0)
+        ghost.y = ghost.y + (ghost.dy or 0)
     end
 
     for _, ghost in ipairs(Ghosts) do
@@ -436,7 +442,9 @@ function CheckColl()
                         Invincibility_timer = 2
                         Packman = {
                             x = 8,
-                            y = 10
+                            y = 10,
+                            dx = 0,
+                            dy = 0
                         }
                 end
 
@@ -467,7 +475,9 @@ function CheckColl()
                         Invincibility_timer = 2
                         Packman = {
                             x = 8,
-                            y = 10
+                            y = 10,
+                            dx = 0,
+                            dy = 0
                         }
                 end
 
@@ -501,7 +511,7 @@ function CheckColl()
         local point = Collectibles[i]
         if point.x - 1 == Packman.x and point.y - 1 == Packman.y then
 
-            if point.type == "." then             
+            if point.type == "." then       
                 Points = Points + 10
                 Love.audio.play(Point_eaten)
 
