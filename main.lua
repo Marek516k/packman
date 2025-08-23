@@ -298,10 +298,10 @@ function Love.update(dt)
 
             Teleport_handler(Packman)
 
-            blinkyAI(Packman.x, Packman.y, Ghosts[1])
-            inkyAI(Packman.x, Packman.y, Ghosts[2], Packman.dx, Packman.dy, Ghosts[1])
-            pinkyAI(Packman.x, Packman.y, Ghosts[3], Packman.dx, Packman.dy)
-            clydeAI(Packman.x, Packman.y, Ghosts[4])
+            Blinky(Packman.x, Packman.y, Ghosts[1])
+            Inky(Packman.x, Packman.y, Ghosts[2], Packman.dx, Packman.dy, Ghosts[1])
+            Pinky(Packman.x, Packman.y, Ghosts[3], Packman.dx, Packman.dy)
+            Clyde(Packman.x, Packman.y, Ghosts[4])
 
             for _, ghost in ipairs(Ghosts) do
                 Teleport_handler(ghost)
@@ -313,10 +313,10 @@ function Love.update(dt)
             local spot = CherrySpots[Love.math.random(#CherrySpots)] -- náhodné místo
             Cherry_Pos = { x = spot.x, y = spot.y }
             Cherry_timer = 0
+            Love.audio.play(CherryAlert)
         end
 
         if Cherry_con then
-            Love.audio.play(CherryAlert)
             Cherry_timer = Cherry_timer + dt
             if Cherry_timer > 5 then
                 Cherry_Pos = nil
@@ -351,7 +351,7 @@ function Love.draw()
 Love.graphics.setColor(1, 1, 1) -- reset
 
     Love.graphics.draw(Packman_image, Packman.x * GridSize, Packman.y * GridSize)
-    
+  
     if Cherry_con and Cherry_Pos and not Gameover then
         Love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
     end

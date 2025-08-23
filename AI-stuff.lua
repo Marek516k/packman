@@ -8,6 +8,15 @@ function Is_wall(x, y)
     return false
 end
 
+function Is_ghost(x, y, selfGhost)
+    for _, g in pairs(Ghosts) do
+        if g ~= selfGhost and g.x == x and g.y == y then
+            return true
+        end
+    end
+    return false
+end
+
 local function shuffleInPlace(t, startIndex)
 
     for i = #t, startIndex, -1 do
@@ -17,13 +26,13 @@ local function shuffleInPlace(t, startIndex)
 end
 
 local function canMove(g, dx, dy)
-
-    return not Is_wall(g.x + dx, g.y + dy)
+    return not Is_wall(g.x + dx, g.y + dy) and not Is_ghost(g.x + dx, g.y + dy, g)
 end
 
 local function stepIfFree(g, dx, dy)
+    if not Is_wall(g.x + dx, g.y + dy)
+       and not Is_ghost(g.x + dx, g.y + dy, g) then
 
-    if not Is_wall(g.x + dx, g.y + dy) then
         g.x = g.x + dx
         g.y = g.y + dy
         g.lastdx, g.lastdy = dx, dy
@@ -33,23 +42,41 @@ local function stepIfFree(g, dx, dy)
 end
 
 local function buildPriorityList(tx, ty, G)
-
     local list = {}
-    -- 1st horizontal toward target
-    table.insert(list, {x = (tx > G.x) and 1 or -1, y = 0})
-    -- 2nd vertical toward target
-    table.insert(list, {x = 0, y = (ty > G.y) and 1 or -1})
-    -- 3rd + 4th: opposite directions (randomized)
-    table.insert(list, {x = -list[1].x, y = 0})
-    table.insert(list, {x = 0, y = -list[2].y})
-    shuffleInPlace(list, 3)
+
+    local dx = (tx > G.x) and 1 or -1
+    local dy = (ty > G.y) and 1 or -1
+
+    local primaries = {
+        {x = dx, y = 0},
+        {x = 0, y = dy},
+    }
+
+    shuffleInPlace(primaries, 1)
+
+    for _, d in ipairs(primaries) do
+        table.insert(list, d)
+    end
+
+    local secondaries = {
+        {x = -dx, y = 0},
+        {x = 0, y = -dy},
+    }
+    shuffleInPlace(secondaries, 1)
+
+    for _, d in ipairs(secondaries) do
+        table.insert(list, d)
+    end
+
     return list
 end
 
 local function ghostMove(G, priorities)
+    if G.state == "respawning" then return
+    end
 
-    if G.state == "respawning" then
-        return
+    if Love.math.random() < 0.2 then -- 20% chance to reshuffle directions completely
+        shuffleInPlace(priorities, 1)
     end
 
     local revx, revy = -(G.lastdx or 0), -(G.lastdy or 0)
@@ -69,30 +96,35 @@ local function ghostMove(G, priorities)
     end
 end
 
-function blinkyAI(Px, Py, G)
+function Blinky(Px, Py, G)
     local priorities = buildPriorityList(Px, Py, G)
     ghostMove(G, priorities)
 end
 
-function pinkyAI(Px, Py, G, Pdirx, Pdiry)
+function Pinky(Px, Py, G, Pdirx, Pdiry)
     local targetX = Px + 4 * Pdirx
     local targetY = Py + 4 * Pdiry
     local priorities = buildPriorityList(targetX, targetY, G)
     ghostMove(G, priorities)
 end
 
-function inkyAI(Px, Py, G, Pdirx, Pdiry, blinky)
+function Inky(Px, Py, G, Pdirx, Pdiry, Blinky_)
+    if not Blinky_ or not Blinky_.x then
+        local priorities = buildPriorityList(Px, Py, G)
+        return ghostMove(G, priorities)
+    end
+
     local aheadX = Px + 2 * Pdirx
     local aheadY = Py + 2 * Pdiry
-    local vectX = (aheadX - blinky.x) * 2
-    local vectY = (aheadY - blinky.y) * 2
-    local targetX = blinky.x + vectX
-    local targetY = blinky.y + vectY
+    local vectX = (aheadX - Blinky_.x) * 2
+    local vectY = (aheadY - Blinky_.y) * 2
+    local targetX = Blinky_.x + vectX
+    local targetY = Blinky_.y + vectY
     local priorities = buildPriorityList(targetX, targetY, G)
     ghostMove(G, priorities)
 end
 
-function clydeAI(Px, Py, G)
+function Clyde(Px, Py, G)
     local dx = Px - G.x
     local dy = Py - G.y
     local dist2 = dx*dx + dy*dy
@@ -109,8 +141,8 @@ function clydeAI(Px, Py, G)
 end
 
 return {
-    blinkyAI = blinkyAI,
-    pinkyAI  = pinkyAI,
-    inkyAI   = inkyAI,
-    clydeAI  = clydeAI,
+    Blinky = Blinky,
+    Pinky  = Pinky,
+    Inky   = Inky,
+    Clyde  = Clyde,
 }
