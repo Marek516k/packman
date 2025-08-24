@@ -2,6 +2,24 @@ Love = require("love")
 Level = require("Levels")
 AI = require("AI-stuff")
 
+function LoseLife()
+    Lives = Lives - 1
+    if Lives > 0 then
+        Love.audio.play(Hit)
+        Invincibility = true
+        Invincibility_timer = 1
+        Packman = { x = 8,
+            y = 10,
+            dx = 0,
+            dy = 0
+        }
+    else
+        Love.audio.stop(Song)
+        Love.audio.play(Death)
+        Gameover = true
+    end
+end
+
 function Key_cashe(dir)
 
     if dir == "right" then return 1, 0
@@ -238,8 +256,10 @@ function Love.load()
     Font_size = Love.graphics.newFont(25)
     Death = Love.audio.newSource("sounds/Death.wav", "static")
     CherryAlert = Love.audio.newSource("sounds/cherryAlert.wav", "static")
+    CherryAlert:setVolume(0.2)
     Song = Love.audio.newSource("sounds/Song.wav", "stream")
     Song:setLooping(true)
+    Song:setVolume(0.1)
     Hit = Love.audio.newSource("sounds/hit.wav", "static")
     CherryEaten = Love.audio.newSource("sounds/cherryEaten.wav", "static")
     Point_eaten = Love.audio.newSource("sounds/point_pickedup.wav", "static")
@@ -265,6 +285,7 @@ function Love.load()
     Invincibility = false
     Invincibility_timer = 0
     Level_control()
+
 end
 
 function Love.update(dt)
@@ -276,6 +297,10 @@ function Love.update(dt)
         if Timer >= Interval and not Gameover and not Trueend then
             Timer = 0
             local x, y = Packman.x, Packman.y
+            for _, ghost in ipairs(Ghosts) do
+                ghost.prevX = ghost.x
+                ghost.prevY = ghost.y
+            end
 
             if NextDir then
                 local dx, dy = Key_cashe(NextDir)
@@ -424,79 +449,35 @@ function CheckColl()
     Packman.prevX = Packman.x
     Packman.prevY = Packman.y
 
-    for _, ghost in ipairs(Ghosts) do
-        ghost.prevX = ghost.x
-        ghost.prevY = ghost.y
-        ghost.x = ghost.x + (ghost.dx or 0)
-        ghost.y = ghost.y + (ghost.dy or 0)
+for _, ghost in ipairs(Ghosts) do
+
+    if Packman.x == ghost.x and Packman.y == ghost.y then     -- exact collision
+        if Invincibility then
+            Points = Points + 200
+            Love.audio.play(Ghost_death)
+            ghost.x = ghost.baseX
+            ghost.y = ghost.baseY
+            ghost.state = "respawning"
+            ghost.respawnTimer = 2
+        else
+            LoseLife()
+        end
     end
 
-    for _, ghost in ipairs(Ghosts) do
-        if Packman.x == ghost.x and Packman.y == ghost.y then --exact cordinates collision
-            if not Invincibility then
-                Lives = Lives - 1
-
-                if Lives > 0 then
-                    Love.audio.play(Hit)
-                        Invincibility = true
-                        Invincibility_timer = 2
-                        Packman = {
-                            x = 8,
-                            y = 10,
-                            dx = 0,
-                            dy = 0
-                        }
-                end
-
-                if Lives == 0 then
-                    Love.audio.stop(Song)
-                    Love.audio.play(Death)
-                    Gameover = true
-                end
-
-                else
-                    Points = Points + 200 -- bonus for eating a ghost
-                    Love.audio.play(Ghost_death)
-                    ghost.x = ghost.baseX
-                    ghost.y = ghost.baseY
-                    ghost.state = "respawning"
-                    ghost.respawnTimer = 2
-                end
-            end
-
-        if Packman.x == ghost.prevX and Packman.y == ghost.prevY and
-           Packman.prevX == ghost.x and Packman.prevY == ghost.y then --head on collision
-            if not Invincibility then
-                Lives = Lives - 1
-
-                if Lives > 0 then
-                    Love.audio.play(Hit)
-                        Invincibility = true
-                        Invincibility_timer = 2
-                        Packman = {
-                            x = 8,
-                            y = 10,
-                            dx = 0,
-                            dy = 0
-                        }
-                end
-
-                if Lives == 0 then
-                    Love.audio.stop(Song)
-                    Love.audio.play(Death)
-                    Gameover = true
-                end
-
-                else
-                    Points = Points + 200 -- bonus for eating a ghost
-                    Love.audio.play(Ghost_death)
-                    ghost.x = ghost.baseX
-                    ghost.y = ghost.baseY
-                    ghost.state = "respawning"
-                    ghost.respawnTimer = 2
-                end
-            end
+    if (Packman.x == ghost.prevX and Packman.y == ghost.prevY) or    -- head-on collision
+       (Packman.prevX == ghost.x and Packman.prevY == ghost.y) then
+        if Invincibility then
+            Points = Points + 200
+            Love.audio.play(Ghost_death)
+            ghost.x = ghost.baseX
+            ghost.y = ghost.baseY
+            ghost.state = "respawning"
+            ghost.respawnTimer = 2
+        else
+            LoseLife()
         end
+    end
+end
 
     if Cherry_con and Cherry_Pos.x == Packman.x and Cherry_Pos.y == Packman.y then
         Love.audio.play(CherryEaten)
@@ -511,7 +492,7 @@ function CheckColl()
         local point = Collectibles[i]
         if point.x - 1 == Packman.x and point.y - 1 == Packman.y then
 
-            if point.type == "." then       
+            if point.type == "." then
                 Points = Points + 10
                 Love.audio.play(Point_eaten)
 
@@ -536,4 +517,3 @@ function CheckColl()
         end
     end
 end
---fix AI Pdirs and hope that i didnt break collision detection
