@@ -4,6 +4,7 @@ AI = require("AI-stuff")
 
 function LoseLife()
     Lives = Lives - 1
+
     if Lives > 0 then
         Love.audio.play(Hit)
         Invincibility = true
@@ -13,6 +14,7 @@ function LoseLife()
             dx = 0,
             dy = 0
         }
+
     else
         Love.audio.stop(Song)
         Love.audio.play(Death)
@@ -26,17 +28,16 @@ function KillGhost(ghost)
     ghost.state = "respawning"
     ghost.respawnTimer = 2
     Points = Points + 200
-    Love.audio.play(Ghost_death)
+    Love.audio.play(Ghost_death:clone())
 end
 
 function Key_cashe(dir)
-
     if dir == "right" then return 1, 0
     end
 
     if dir == "left" then return -1, 0
     end
-    
+
     if dir == "up" then return 0, -1
     end
 
@@ -47,7 +48,6 @@ function Key_cashe(dir)
 end
 
 function Love.keypressed(key)
-
     if key == "d" then
         NextDir = "right"
         Gamestarted = true
@@ -57,7 +57,7 @@ function Love.keypressed(key)
         NextDir = "left"
         Gamestarted = true
     end
-    
+
     if key == "w" then
         NextDir = "up"
         Gamestarted = true
@@ -77,6 +77,7 @@ end
 
 function Teleport_handler(entity)
     for _, tp in ipairs(Teleports) do
+
         if entity.x + 1 == tp.x and entity.y + 1 == tp.y then
             entity.x = tp.tx - 1
             entity.y = tp.ty - 1
@@ -88,6 +89,7 @@ end
 function Is_wall(x, y)
 
     for _, wall in ipairs(Walls) do
+
         if wall.x - 1 == x and wall.y - 1 == y then
             return true
         end
@@ -105,6 +107,7 @@ function Level_control()
         Gamestarted = false
     end
 
+    Lives = 2
     Collectibles = {}
     Teleports = {}
     TeleportSpots = {}
@@ -115,7 +118,7 @@ function Level_control()
     Cherry_Pos = nil
     Cherry_con = false
     CherrySpots = {}
-    
+
     Packman = {
         x = 8, y = 10,
         dir = nil,
@@ -131,27 +134,28 @@ function Level_control()
             dx = 0, dy = 0
         },
         {
-            x = 12, y = 10,
-            baseX = 12, baseY = 10,
+            x = 10, y = 10,
+            baseX = 10, baseY = 10,
             type = "inky",
             state = "normal",
             dx = 0, dy = 0
         },
         {
-            x = 13, y = 10,
-            baseX = 13, baseY = 10,
+            x = 11, y = 9,
+            baseX = 11, baseY = 9,
             type = "pinky",
             state = "normal",
             dx = 0, dy = 0
         },
         {
-            x = 14, y = 10,
-            baseX = 14, baseY = 10,
+            x = 10, y = 9,
+            baseX = 10, baseY = 9,
             type = "clyde",
             state = "normal",
             dx = 0, dy = 0
         }
     }
+
     if NextLevel == 5 then
         Ghosts = {
             {
@@ -188,6 +192,7 @@ function Level_control()
     for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
+
             if tile == "t" then
                 table.insert(TeleportSpots, {
                     x = x,
@@ -222,6 +227,7 @@ function Level_control()
         for x = 1, #row do
             local tile = row:sub(x, x)
             if tile == "." or tile == "o" then
+
                 Number_of_collectibles = Number_of_collectibles + 1
                 table.insert(Collectibles, {
                     x = x,
@@ -235,11 +241,13 @@ function Level_control()
     for y, row in ipairs(CurrentLevel.map) do
         for x = 1, #row do
             local tile = row:sub(x, x)
+
             if tile == "#" then
                 table.insert(Walls, {
                     x = x,
                     y = y
                 })
+
             elseif tile == "C" then
                 table.insert(CherrySpots, { x = x - 1, y = y - 1 })
             end
@@ -287,7 +295,6 @@ function Love.load()
     Invincibility = false
     Invincibility_timer = 0
     Level_control()
-
 end
 
 function Love.update(dt)
@@ -299,6 +306,7 @@ function Love.update(dt)
         if Timer >= Interval and not Gameover and not Trueend then
             Timer = 0
             local x, y = Packman.x, Packman.y
+
             for _, ghost in ipairs(Ghosts) do
                 ghost.prevX = ghost.x
                 ghost.prevY = ghost.y
@@ -306,6 +314,7 @@ function Love.update(dt)
 
             if NextDir then
                 local dx, dy = Key_cashe(NextDir)
+
                 if not Is_wall(x + dx, y + dy) then
                     Packman.dir = NextDir
                     NextDir = nil
@@ -317,6 +326,7 @@ function Love.update(dt)
                 if not Is_wall(x + dx, y + dy) then
                     Packman.x = x + dx
                     Packman.y = y + dy
+
                 else
                     Packman.dx = 0
                     Packman.dy = 0
@@ -345,6 +355,7 @@ function Love.update(dt)
 
         if Cherry_con then
             Cherry_timer = Cherry_timer + dt
+
             if Cherry_timer > 5 then
                 Cherry_Pos = nil
                 Cherry_con = false
@@ -355,6 +366,7 @@ function Love.update(dt)
 
         if Invincibility then
             Invincibility_timer = Invincibility_timer - dt
+
             if Invincibility_timer <= 0 then
                 Invincibility = false
             end
@@ -364,6 +376,7 @@ function Love.update(dt)
         for _, ghost in ipairs(Ghosts) do
             if ghost.state == "respawning" and ghost.respawnTimer then
                 ghost.respawnTimer = ghost.respawnTimer - dt
+
                 if ghost.respawnTimer <= 0 then
                     ghost.state = "normal"
                     ghost.respawnTimer = nil
@@ -375,10 +388,9 @@ end
 
 function Love.draw()
 
-Love.graphics.setColor(1, 1, 1) -- reset
-
+    Love.graphics.setColor(1, 1, 1) -- reset
     Love.graphics.draw(Packman_image, Packman.x * GridSize, Packman.y * GridSize)
-  
+
     if Cherry_con and Cherry_Pos and not Gameover then
         Love.graphics.draw(Cherry, Cherry_Pos.x * GridSize, Cherry_Pos.y * GridSize)
     end
@@ -386,8 +398,10 @@ Love.graphics.setColor(1, 1, 1) -- reset
     for _, point in ipairs(Collectibles) do
         local drawX = (point.x - 1) * GridSize
         local drawY = (point.y - 1) * GridSize
+
         if point.type == "." then
             Love.graphics.draw(Point_image, drawX, drawY)
+
         elseif point.type == "o" then
             Love.graphics.draw(BigPoint_image, drawX, drawY)
         end
@@ -402,12 +416,16 @@ Love.graphics.setColor(1, 1, 1) -- reset
     for _, ghost in ipairs(Ghosts) do
         local drawX = (ghost.x) * GridSize
         local drawY = (ghost.y) * GridSize
+
         if ghost.type == "blinky" then
             Love.graphics.draw(Blinky_image, drawX, drawY)
+
         elseif ghost.type == "inky" then
             Love.graphics.draw(Inky_image, drawX, drawY)
+
         elseif ghost.type == "pinky" then
             Love.graphics.draw(Pinky_image, drawX, drawY)
+
         elseif ghost.type == "clyde" then
             Love.graphics.draw(Clyde_image, drawX, drawY)
         end
@@ -448,12 +466,12 @@ Love.graphics.setColor(1, 1, 1) -- reset
 end
 
 function CheckColl()
-
     for _, ghost in ipairs(Ghosts) do
         if Packman.x == ghost.x and Packman.y == ghost.y and ghost.state == "normal" then   -- exact collision
 
             if Invincibility then
                 KillGhost(ghost)
+
             else
                 LoseLife()
             end
@@ -463,6 +481,7 @@ function CheckColl()
            (Packman.prevX == ghost.x and Packman.prevY == ghost.y)) and ghost.state == "normal" then
             if Invincibility then
                 KillGhost(ghost)
+
             else
                 LoseLife()
             end
@@ -484,6 +503,7 @@ function CheckColl()
             if point.type == "." then
                 Points = Points + 10
                 Love.audio.play(Point_eaten:clone())
+
             elseif point.type == "o" then
                 Points = Points + 50
                 Love.audio.play(Bigpoint_eaten)
@@ -494,7 +514,7 @@ function CheckColl()
             Number_of_collectibles = Number_of_collectibles - 1
             table.remove(Collectibles, i)
 
-            if Number_of_collectibles == 200 then
+            if Number_of_collectibles == 0 then
                 NextLevel = NextLevel + 1
                 CurrentLevel = Level[NextLevel]
                 Love.audio.stop(Song)
