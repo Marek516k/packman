@@ -20,6 +20,15 @@ function LoseLife()
     end
 end
 
+function KillGhost(ghost)
+    ghost.x = ghost.baseX
+    ghost.y = ghost.baseY
+    ghost.state = "respawning"
+    ghost.respawnTimer = 2
+    Points = Points + 200
+    Love.audio.play(Ghost_death)
+end
+
 function Key_cashe(dir)
 
     if dir == "right" then return 1, 0
@@ -85,13 +94,6 @@ function Is_wall(x, y)
     end
 
     return false
-end
-
-function Ghost_pos(ghost)
-    ghost.x = ghost.baseX
-    ghost.y = ghost.baseY
-    ghost.state = "normal"
-    ghost.respawnTimer = nil
 end
 
 function Level_control()
@@ -446,38 +448,26 @@ Love.graphics.setColor(1, 1, 1) -- reset
 end
 
 function CheckColl()
-    Packman.prevX = Packman.x
-    Packman.prevY = Packman.y
 
-for _, ghost in ipairs(Ghosts) do
+    for _, ghost in ipairs(Ghosts) do
+        if Packman.x == ghost.x and Packman.y == ghost.y and ghost.state == "normal" then   -- exact collision
 
-    if Packman.x == ghost.x and Packman.y == ghost.y then     -- exact collision
-        if Invincibility then
-            Points = Points + 200
-            Love.audio.play(Ghost_death)
-            ghost.x = ghost.baseX
-            ghost.y = ghost.baseY
-            ghost.state = "respawning"
-            ghost.respawnTimer = 2
-        else
-            LoseLife()
+            if Invincibility then
+                KillGhost(ghost)
+            else
+                LoseLife()
+            end
+        end
+
+        if ((Packman.x == ghost.prevX and Packman.y == ghost.prevY) and ghost.state == "normal" or  -- head-on collision
+           (Packman.prevX == ghost.x and Packman.prevY == ghost.y)) and ghost.state == "normal" then
+            if Invincibility then
+                KillGhost(ghost)
+            else
+                LoseLife()
+            end
         end
     end
-
-    if (Packman.x == ghost.prevX and Packman.y == ghost.prevY) or    -- head-on collision
-       (Packman.prevX == ghost.x and Packman.prevY == ghost.y) then
-        if Invincibility then
-            Points = Points + 200
-            Love.audio.play(Ghost_death)
-            ghost.x = ghost.baseX
-            ghost.y = ghost.baseY
-            ghost.state = "respawning"
-            ghost.respawnTimer = 2
-        else
-            LoseLife()
-        end
-    end
-end
 
     if Cherry_con and Cherry_Pos.x == Packman.x and Cherry_Pos.y == Packman.y then
         Love.audio.play(CherryEaten)
@@ -491,11 +481,9 @@ end
     for i = #Collectibles, 1, -1 do
         local point = Collectibles[i]
         if point.x - 1 == Packman.x and point.y - 1 == Packman.y then
-
             if point.type == "." then
                 Points = Points + 10
-                Love.audio.play(Point_eaten)
-
+                Love.audio.play(Point_eaten:clone())
             elseif point.type == "o" then
                 Points = Points + 50
                 Love.audio.play(Bigpoint_eaten)
