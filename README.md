@@ -1,1 +1,1 @@
-It's broken right now sorry 😥.
+Wooooahh you can play this no way
