@@ -8,7 +8,7 @@ function LoseLife()
     if Lives > 0 then
         Love.audio.play(Hit)
         Invincibility = true
-        Invincibility_timer = 1
+        Invincibility_timer = 2
         Packman = { x = 8,
             y = 10,
             dx = 0,
@@ -107,7 +107,7 @@ function Level_control()
         Gamestarted = false
     end
 
-    Lives = 2
+    Lives = 3
     Collectibles = {}
     Teleports = {}
     TeleportSpots = {}
@@ -269,11 +269,11 @@ function Love.load()
     CherryAlert:setVolume(0.2)
     Song = Love.audio.newSource("sounds/Song.wav", "stream")
     Song:setLooping(true)
-    Song:setVolume(0.035)
+    Song:setVolume(0.031)
     Hit = Love.audio.newSource("sounds/hit.wav", "static")
     CherryEaten = Love.audio.newSource("sounds/cherryEaten.wav", "static")
     Point_eaten = Love.audio.newSource("sounds/point_pickedup.wav", "static")
-    Point_eaten:setVolume(0.03)
+    Point_eaten:setVolume(0.025)
     Bigpoint_eaten = Love.audio.newSource("sounds/bigpoint.wav", "static")
     Victory = Love.audio.newSource("sounds/victory.wav", "static")
     Ghost_death = Love.audio.newSource("sounds/ghost_death.wav", "static")
@@ -290,7 +290,7 @@ function Love.load()
     Lives = 2
     Points = 0
     Timer = 0
-    Interval = 0.4
+    Interval = 0.32
     Gameover = false
     Gamestarted = false
     Invincibility = false
