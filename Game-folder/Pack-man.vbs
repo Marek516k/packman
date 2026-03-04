@@ -5,4 +5,3 @@ folder = fso.GetParentFolderName(WScript.ScriptFullName)
 shell.CurrentDirectory = folder
 
 shell.Run "love.exe .", 1, False
-
